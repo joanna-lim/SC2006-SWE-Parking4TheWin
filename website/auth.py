@@ -52,9 +52,6 @@ def sign_up():
 
         if driver:
             flash('An account has already been created with this email', category='error')
-            
-        elif len(first_name) < 2:
-            flash('First name should be at least 2 characters', category='error')
         
         elif len(password1) < 8:
             flash('Password should be at least 8 characters :(', category='error')
