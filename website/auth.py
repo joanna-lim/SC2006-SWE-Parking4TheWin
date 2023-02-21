@@ -8,6 +8,7 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    flash('Welcome to Parking4TheWin!', category='success')
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -16,7 +17,6 @@ def login():
 
         if driver:
             if check_password_hash(driver.password, password):
-                flash('Login Successful! :)', category='success')
                 login_user(driver, remember=True)
                 return redirect(url_for('views.home'))
             else:
