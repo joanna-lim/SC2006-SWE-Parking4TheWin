@@ -1,19 +1,20 @@
-{% extends "base.html" %} {% block title %} Driver Login{% endblock %} {% block
+{% extends "base.html" %} {% block title %} COE Registration {% endblock %} {% block
 content %}
+
 <div class="container" width="300px">
   <div class="row justify-content-center">
     <div class="col-md-6">
       <form method="POST">
         <br />
-        <h3 align="center">Corporate Login</h3>
+        <h3 align="center">Driver Login</h3>
         <div class="form-group">
-          <label for="uen">UEN</label>
+          <label for="email">Email</label>
           <input
-            type="text"
+            type="email"
             class="form-control"
-            id="uen"
-            name="uen"
-            placeholder="Enter UEN"
+            id="email"
+            name="email"
+            placeholder="Enter email"
           />
         </div>
         <div class="form-group">
@@ -29,10 +30,8 @@ content %}
         <br />
         <button type="submit" class="btn btn-primary">Login</button>
         <br />
-        <a href="/driver-login">Driver account? Login here. </a>
+        <a href="/corporate-login">Corporate account? Login here. </a>
       </form>
     </div>
   </div>
 </div>
-
-{% endblock %}

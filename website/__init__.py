@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import os
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
+from functools import wraps
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
@@ -30,6 +31,17 @@ def create_app():
     @login_manager.user_loader
     def load_user(id):
         return User.query.get(int(id)) #telling flask how we load a user
+
+    def role_required(role):
+        def wrapper(fn):
+            @wraps(fn)
+            def decorated_view(*args, **kwargs):
+                if not current_user.is_authenticated or current_user.role != role:
+                    # redirect to unauthorized page or show error message
+                    return redirect(url_for('unauthorized'))
+                return fn(*args, **kwargs)
+            return decorated_view
+        return wrapper
 
     return app
  

@@ -46,7 +46,7 @@ def corporate_login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('auth.driver_login'))
 
 @auth.route('/driver-sign-up', methods=['GET', 'POST'])
 def driver_sign_up():
@@ -75,7 +75,7 @@ def driver_sign_up():
             
         else:
             # add user to database
-            new_driver = User(email=email, first_name=first_name, password=generate_password_hash(password1,method='sha256'), user_type="DRIVER")
+            new_driver = User(email=email, first_name=first_name, password=generate_password_hash(password1,method='sha256'), user_type="driver")
             db.session.add(new_driver)
             db.session.commit()
             login_user(new_driver,remember=True)
@@ -110,7 +110,7 @@ def corporate_sign_up():
             
         else:
             # add user to database
-            new_company = User(uen=uen, company_name = company_name, password=generate_password_hash(password1,method='sha256'), user_type="COMPANY")
+            new_company = User(uen=uen, company_name = company_name, password=generate_password_hash(password1,method='sha256'), user_type="corporate")
             db.session.add(new_company)
             db.session.commit()
             login_user(new_company,remember=True)
