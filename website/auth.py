@@ -3,8 +3,19 @@ from .models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
+from functools import wraps
 
 auth = Blueprint('auth', __name__)
+
+def role_required(role):
+    def wrapper(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            if not current_user.is_authenticated or current_user.role != role:
+                return redirect(url_for('auth.driver_login'))
+            return fn(*args, **kwargs)
+        return decorated_view
+    return wrapper
 
 @auth.route('/driver-login', methods=['GET', 'POST'])
 def driver_login():
