@@ -43,10 +43,7 @@ def sign_up():
 
         """
         account creation restrictions:
-        - unique username 
-        - username must be at least 3 characters
-        - username cannot have spaces, and cannot start with digits, and must be alphanumeric
-        - first name must be at least 2 characters
+        - unique email
         - password must be at least 8 characters
         """
 
