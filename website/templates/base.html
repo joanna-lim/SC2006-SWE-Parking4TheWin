@@ -34,7 +34,7 @@
       <div class="collapse navbar-collapse" id="navbar">
         <div class="navbar-nav">
           {% if user.is_authenticated and user.user_type=="driver"%}
-          <a class="nav-item nav-link" id="home" href="/">home</a>
+          <a class="nav-item nav-link" id="carparks" href="/">carparks</a>
           <a class="nav-item nav-link" id="logout" href="/logout">logout</a>
           {% elif user.is_authenticated and user.user_type=="corporate"%}
           <a class="nav-item nav-link" id="rewards" href="/rewards">rewards</a>
