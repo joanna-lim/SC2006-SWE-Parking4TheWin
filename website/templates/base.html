@@ -35,9 +35,11 @@
         <div class="navbar-nav">
           {% if user.is_authenticated and user.user_type=="driver"%}
           <a class="nav-item nav-link" id="carparks" href="/">carparks</a>
+          <a class="nav-item nav-link" id="COEregistration" href="/coe-registration">COE registration</a>
+          <a class="nav-item nav-link" id="viewRewards" href="/view-rewards">view rewards</a>
           <a class="nav-item nav-link" id="logout" href="/logout">logout</a>
           {% elif user.is_authenticated and user.user_type=="corporate"%}
-          <a class="nav-item nav-link" id="rewards" href="/rewards">rewards</a>
+          <a class="nav-item nav-link" id="rewards" href="/rewards-creation">rewards creation</a>
           <a class="nav-item nav-link" id="logout" href="/logout">logout</a>
           {%else%}
           <a class="nav-item nav-link" id="driverLogin" href="/driver-login">login</a>
