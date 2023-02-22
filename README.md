@@ -6,3 +6,4 @@ By Min Khant, Jun Xiong, Ruxing, Ivan, Qiu Zhen and Joanna.
 - Clone this repository into your local machine
 - Install all dependencies in requirements.txt `pip3 install -r requirements.txt`
 - To run the app, `python3 main.py`
+Lol
