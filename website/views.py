@@ -12,3 +12,10 @@ views = Blueprint('views', __name__)
 def home():
 
     return render_template("home.html", user=current_user)
+
+
+@views.route('/rewards-creation', methods=['GET', 'POST'])
+@role_required('corporate')
+def rewards_creation():
+
+    return render_template("rewards_creation.html", user=current_user)

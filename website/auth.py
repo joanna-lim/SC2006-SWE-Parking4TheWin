@@ -11,8 +11,12 @@ def role_required(role):
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
-            if not current_user.is_authenticated or current_user.role != role:
+            if not current_user.is_authenticated:
                 return redirect(url_for('auth.driver_login'))
+            elif current_user.user_type=='driver' and role=='corporate':
+                return redirect(url_for('views.home'))
+            elif current_user.user_type=='corporate' and role=='driver':
+                return redirect(url_for('views.rewards_creation'))
             return fn(*args, **kwargs)
         return decorated_view
     return wrapper
