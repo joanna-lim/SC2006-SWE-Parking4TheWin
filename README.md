@@ -5,5 +5,11 @@ By Min Khant, Jun Xiong, Ruxing, Ivan, Qiu Zhen and Joanna.
 ## How To Use
 - Clone this repository into your local machine
 - Install all dependencies in requirements.txt `pip3 install -r requirements.txt`
-- To run the app, `python3 main.py`
+- You need to create a '.env' file containing the following information:
+  ```python
+  MAPBOX_SECRET_KEY = "YOUR_MAPBOX_ACCESS_TOKEN"
+  ```
+  where YOUR_MAPBOX_ACCESS_TOKEN is your personal mapbox access token.
+
+- To run the app, run `python3 main.py`, and go to http://127.0.0.1:5000
 
