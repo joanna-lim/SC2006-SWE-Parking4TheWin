@@ -4,6 +4,7 @@ from . import db
 from .auth import role_required
 from functools import wraps
 from .models import *
+from datetime import datetime
 import json
 import os
 
@@ -22,17 +23,14 @@ def home():
 @role_required('driver')
 def coe_registration():
     if request.method == "POST":
-        print(request.form["name"])
-        print(request.form["car_plate"])
-        print(request.form["coe_expiry"])
-        name = request.form["name"]
-        car_plate = request.form["car_plate"]
-        coe_expiry = request.form["coe_expiry"]
-
-        new_car = Vehicle(car_plate=car_plate)
-        db.session.add(new_car) 
+        full_name = request.form.get('fullName')
+        car_plate = request.form.get('carPlate')
+        coe_expiry_html = request.form.get('coeExpiry')
+        coe_expiry = datetime.strptime(coe_expiry_html, '%Y-%m-%d').date()
+        new_vehicle = Vehicle(full_name=full_name, car_plate=car_plate, coe_expiry=coe_expiry, user_id=current_user.id)
+        db.session.add(new_vehicle) 
         db.session.commit()
-        print(new_car.id)
+        print(new_vehicle.id)
         print(Vehicle.query.all())
         car = Vehicle.query.all()
         return render_template("coe_registered.html", user=current_user, car=car)

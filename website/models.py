@@ -15,7 +15,9 @@ class User(db.Model, UserMixin):
 
 class Vehicle(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(150))
     car_plate = db.Column(db.String(150))
+    coe_expiry = db.Column(db.Date)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 class CarPark(db.Model):
