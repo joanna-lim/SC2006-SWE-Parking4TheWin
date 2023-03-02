@@ -4,15 +4,15 @@ import json
 # Format the carpark information to match the database
 def format_carpark_information(record):
     fattributes = list()
-    fattributes.append(record.get("address"))
-    fattributes.append(float(record.get("x_coord")))
-    fattributes.append(float(record.get("y_coord")))
-    fattributes.append(record.get("car_park_type"))
-    fattributes.append(record.get("type_of_parking_system"))
-    fattributes.append(record.get("short_term_parking"))
-    fattributes.append(record.get("free_parking"))
+    fattributes.append(record[1])
+    fattributes.append(float(record[2]))
+    fattributes.append(float(record[3]))
+    fattributes.append(record[4])
+    fattributes.append(record[5])
+    fattributes.append(record[6])
+    fattributes.append(record[7])
 
-    np = record.get("night_parking")
+    np = record[8]
     if np == "YES":
         fattributes.append(True)
     elif np == "NO":
@@ -21,10 +21,10 @@ def format_carpark_information(record):
         print("Error")
         return None
 
-    fattributes.append(int(record.get("car_park_decks")))
-    fattributes.append(float(record.get("gantry_height")))
+    fattributes.append(int(record[9]))
+    fattributes.append(float(record[10]))
 
-    cpb = record.get("car_park_basement")
+    cpb = record[11]
     if cpb == "Y":
         fattributes.append(True)
     elif cpb == "N":
@@ -41,22 +41,17 @@ def update_carparks():
     print("XXXXX Updating carparks XXXXX")
     from . import db
     from .models import CarPark
+    import csv
 
-    url = 'https://data.gov.sg/api/action/datastore_search?resource_id=139a3035-e624-4f56-b63f-89ae28d4ae4c'
-
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-    }
-
-    req = urllib.request.Request(url, headers=headers)
-    fileobj = urllib.request.urlopen(req)
-    json_data = json.load(fileobj)
-
-    records = json_data['result']['records']
+    records = list()
+    with open('./website/hdb-carpark-information.csv', newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+        for row in reader:
+            records.append(row)
 
     for record in records:
         fattributes = format_carpark_information(record)
-        carpark = CarPark.query.get(record.get("car_park_no"))
+        carpark = CarPark.query.get(record[0])
 
         if carpark:
             carpark.address = fattributes[0]
@@ -72,7 +67,7 @@ def update_carparks():
             carpark.car_park_basement = fattributes[10]
         else:
             carpark = CarPark(
-                car_park_no = record.get("car_park_no"),
+                car_park_no = record[0],
                 address = fattributes[0],
                 x_coord = fattributes[1],
                 y_coord = fattributes[2],
