@@ -2,7 +2,7 @@ import urllib.request
 import json
 
 # Format the carpark information to match the database
-def format_record(record):
+def format_carpark_information(record):
     fattributes = list()
     fattributes.append(record.get("address"))
     fattributes.append(float(record.get("x_coord")))
@@ -55,7 +55,7 @@ def update_carparks():
     records = json_data['result']['records']
 
     for record in records:
-        fattributes = format_record(record)
+        fattributes = format_carpark_information(record)
         carpark = CarPark.query.get(record.get("car_park_no"))
 
         if carpark:
@@ -83,8 +83,50 @@ def update_carparks():
                 night_parking = fattributes[7],
                 car_park_decks = fattributes[8],
                 gantry_height = fattributes[9],
-                car_park_basement = fattributes[10]
+                car_park_basement = fattributes[10],
+                # attributes below are not in the dataset being queried
+                total_lots = None,
+                lots_available = None,
+                lot_type = None,
+                lot_info_last_updated = None
             )
             db.session.add(carpark)
     
+    db.session.commit()
+
+def update_carparks_availability():
+    print("XXXXX Updating carparks availability XXXXX")
+    from . import db
+    from .models import CarPark
+
+    url = 'https://api.data.gov.sg/v1/transport/carpark-availability'
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    }
+
+    req = urllib.request.Request(url, headers=headers)
+    fileobj = urllib.request.urlopen(req)
+    json_data = json.load(fileobj)
+
+    records = json_data['items'][0]['carpark_data']
+
+    for record in records:
+        carpark_info = record.get("carpark_info")[0]
+
+        total_lots = int(carpark_info.get("total_lots"))
+        lots_available = int(carpark_info.get("lots_available"))
+        lot_type = carpark_info.get("lot_type")
+        lot_info_last_updated = record.get("update_datetime")
+
+        carpark = CarPark.query.get(record.get("carpark_number"))
+
+        # update availability if the carpark exists in the database
+        # otherwise, omit
+        if carpark:
+            carpark.total_lots = total_lots
+            carpark.lots_available = lots_available
+            carpark.lot_type = lot_type
+            carpark.lot_info_last_updated = lot_info_last_updated
+
     db.session.commit()

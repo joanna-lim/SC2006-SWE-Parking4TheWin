@@ -31,6 +31,10 @@ class CarPark(db.Model):
     car_park_decks = db.Column(db.Integer)
     gantry_height = db.Column(db.Float)
     car_park_basement = db.Column(db.Boolean)
+    total_lots = db.Column(db.Integer)
+    lots_available = db.Column(db.Integer)
+    lot_type = db.Column(db.String(1))
+    lot_info_last_updated = db.Column(db.String(150))
 
 
 
