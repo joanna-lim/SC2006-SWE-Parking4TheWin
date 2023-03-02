@@ -1,6 +1,51 @@
 {% extends "base.html" %} {% block title %} COE Registration {% endblock %} {% block
-content %}
-
-COE registration placeholder
-
-{% endblock %}
+    content %}
+    
+    <div class="container" width="300px">
+        <div class="row justify-content-center">
+          <div class="col-md-6">
+            <form method="POST">
+              <br />
+              <h3 align="center">COE Registration</h3>
+              <div class="form-group">
+                <label for="name">Full Name</label>
+                <input
+                  type="name"
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  placeholder="Enter name"
+                />
+              </div>
+              <div class="form-group">
+                <label for="car_plate">Vehicle Number</label>
+                <input
+                  type="car_plate"
+                  class="form-control"
+                  id="car_plate"
+                  name="car_plate"
+                  placeholder="Enter Vehicle Number"
+                />
+              </div>
+              <div class="form-group">
+                <label for="coe_expiry">COE Expiry</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="coe_expiry"
+                  name="coe_expiry"
+                  placeholder="Enter COE Expiry"
+                />
+              </div>
+              <br />
+              <button type="submit" class="btn btn-primary mb-4">Register</button>
+              <br />
+            </form>
+          </div>
+        </div>
+      </div>
+    
+    
+    
+    {% endblock %}
+    

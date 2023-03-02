@@ -1,0 +1,24 @@
+{% extends "base.html" %} {% block title %} COE Registered {% endblock %} {% block
+    content %}
+    
+    <h1>Thank you for registering your COE</h1>
+    
+    <table>
+        <tr>
+          <th>Name</th>
+          <th>Car plate</th>
+        </tr>
+        {% for car in car %}
+        <tr>
+          <td>
+            {{car.id}}
+        </td>
+        <td>
+            {{car.car_plate}}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+
+    {% endblock %}
+    
