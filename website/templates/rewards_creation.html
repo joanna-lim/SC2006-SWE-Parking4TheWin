@@ -1,6 +1,41 @@
-{% extends "base.html" %} {% block title %} Rewards Creation {% endblock %} {% block
-    content %}
-
-    <h> HELLO REWARDS CREATION PAGE PLACEHOLDER </h>
-
+{% extends "base.html" %} {% block title %}Rewards Creation{% endblock %} {%
+    block content %}
+    <div class="container" width="300px">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <form method="POST">
+            <br />
+            <h3 align="center">Create Rewards</h3>
+            <div class="form-group">
+              <label for="uen">Reward Title</label>
+              <input
+                type="text"
+                class="form-control"
+                id="rewardTitle"
+                name="rewardTitle"
+                placeholder="Enter Reward Title"
+              />
+            </div>
+            <div class="form-group">
+              <label for="rewardExpiry">Reward Expiry</label>
+              <input
+                type="date"
+                class="form-control"
+                id="rewardExpiry"
+                name="rewardExpiry"
+                placeholder="Enter Reward Expiry Date"
+              />
+            </div>
+            <label for="rewardDetails">Reward Details</label>
+            <textarea name="rewardDetails" id="rewardDetails" class="form-control"></textarea>
+           
+            <br />
+            <button type="submit" class="btn btn-primary mb-4">Add Reward</button>
+            
+          </form>
+        </div>
+      </div>
+    </div>
+    
     {% endblock %}
+    

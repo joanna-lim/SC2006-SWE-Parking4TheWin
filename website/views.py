@@ -30,27 +30,31 @@ def coe_registration():
         new_vehicle = Vehicle(full_name=full_name, car_plate=car_plate, coe_expiry=coe_expiry, user_id=current_user.id)
         db.session.add(new_vehicle) 
         db.session.commit()
-        print(new_vehicle.id)
-        print(Vehicle.query.all())
-        car = Vehicle.query.all()
-        return render_template("coe_registered.html", user=current_user, car=car)
+        return render_template("coe_registered.html", user=current_user)
     return render_template("coe_registration.html", user=current_user)
 
 @views.route('/coe-registration', methods=['GET', 'POST'])
 @role_required('driver')
 def coe_registered():
     car = Vehicle.query.all()
-    return render_template("coe_registered.html", user=current_user, car=car)
+    return render_template("coe_registered.html", user=current_user)
 
 @views.route('/view-rewards', methods=['GET', 'POST'])
 @role_required('driver')
 def view_rewards():
-
-    return render_template("view_rewards.html", user=current_user)
+    rewards = Reward.query.all()
+    return render_template("view_rewards.html", user=current_user, rewards=rewards)
 
 # corporate views here
 @views.route('/rewards-creation', methods=['GET', 'POST'])
 @role_required('corporate')
 def rewards_creation():
-
+    if request.method == "POST":
+        reward_title = request.form.get('rewardTitle')
+        reward_expiry_html = request.form.get('rewardExpiry')
+        reward_details = request.form.get('rewardDetails')
+        reward_expiry = datetime.strptime(reward_expiry_html, '%Y-%m-%d').date()
+        new_reward = Reward(reward_title=reward_title, reward_expiry=reward_expiry, reward_details=reward_details, user_id= current_user.id)
+        db.session.add(new_reward) 
+        db.session.commit()
     return render_template("rewards_creation.html", user=current_user)

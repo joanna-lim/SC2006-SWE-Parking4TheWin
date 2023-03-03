@@ -8,7 +8,7 @@ class User(db.Model, UserMixin):
     # for drivers
     email = db.Column(db.String(150), unique=True)
     first_name = db.Column(db.String(150))
-    vehicle = db.relationship('Vehicle')
+    vehicles = db.relationship('Vehicle')
     # for companies
     company_name = db.Column(db.String(150))
     uen = db.Column(db.String(150), unique=True)
@@ -19,6 +19,14 @@ class Vehicle(db.Model):
     car_plate = db.Column(db.String(150))
     coe_expiry = db.Column(db.Date)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+class Reward(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    reward_title = db.Column(db.String(150))
+    reward_expiry = db.Column(db.Date)
+    reward_details = db.Column(db.String(10000))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    company = db.relationship('User', backref='company')
 
 class CarPark(db.Model):
     car_park_no = db.Column(db.String, primary_key=True)

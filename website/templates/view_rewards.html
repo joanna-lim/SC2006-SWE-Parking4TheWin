@@ -1,6 +1,18 @@
-{% extends "base.html" %} {% block title %} Rewards Creation {% endblock %} {% block
-    content %}
+{% extends "base.html" %} {% block title %} View Rewards {% endblock %} {% block
+content %}
+</br>
+<h3 align="center">View Rewards</h3>
+<ul class="list-group list-group-flush" id="rewards">
+  {% for reward in rewards %}
+  <li class="list-group-item">
+    <div>
+      <h4>{{ reward.reward_title }}</h4>
+      <p>Company: {{ reward.company.company_name}}</p>
+      <p>Details: {{ reward.reward_details }}</p>
+      <p>Expiry: {{reward.reward_expiry}}</p>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
 
-    <h> view rewards placeholder </h>
-
-    {% endblock %}
+{% endblock %}
