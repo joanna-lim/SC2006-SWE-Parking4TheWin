@@ -1,5 +1,6 @@
 from . import db
 from flask_login import UserMixin
+import math
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,5 +46,3 @@ class CarPark(db.Model):
     lots_available = db.Column(db.Integer)
     lot_type = db.Column(db.String(1))
     lot_info_last_updated = db.Column(db.String(150))
-
-
