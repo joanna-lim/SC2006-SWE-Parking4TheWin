@@ -47,4 +47,3 @@ class CarPark(db.Model):
     lot_info_last_updated = db.Column(db.String(150))
 
 
-

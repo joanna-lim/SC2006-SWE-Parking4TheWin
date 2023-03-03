@@ -28,7 +28,7 @@
   </head>
   <body>
     <br />
-    <h1 align="center"> Home </h1>
+    <h1 align="center">Home</h1>
     <style>
       .mapboxgl-popup {
         max-width: 200px;
@@ -37,24 +37,16 @@
     </style>
     <div id="map"></div>
     <script MAPBOX_SECRET_KEY={{ MAPBOX_SECRET_KEY }}>
-      MAPBOX_SECRET_KEY = document.currentScript.getAttribute("MAPBOX_SECRET_KEY")
+      MAPBOX_SECRET_KEY =
+        document.currentScript.getAttribute("MAPBOX_SECRET_KEY");
       mapboxgl.accessToken = MAPBOX_SECRET_KEY;
-      const map = new mapboxgl.Map({
+      var map = new mapboxgl.Map({
         container: "map",
         // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
         style: "mapbox://styles/mapbox/streets-v12",
         center: [103.8198, 1.3521],
         zoom: 12,
       });
-
-      // Create a new marker with a popup description
-      var marker = new mapboxgl.Marker()
-        .setLngLat([103.68540764179262, 1.3408834196588528])
-        .setPopup(
-          new mapboxgl.Popup().setHTML("<p> PARKINGGGG </p>"
-        ))
-        .addTo(map);
-  
     </script>
   </body>
 </html>
