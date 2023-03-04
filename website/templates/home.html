@@ -36,7 +36,7 @@
       }
     </style>
     <div id="map">
-      <script MAPBOX_SECRET_KEY= {{ MAPBOX_SECRET_KEY }}>
+      <script MAPBOX_SECRET_KEY={{ MAPBOX_SECRET_KEY }}>
         MAPBOX_SECRET_KEY =
           document.currentScript.getAttribute("MAPBOX_SECRET_KEY");
         mapboxgl.accessToken = MAPBOX_SECRET_KEY;
@@ -55,16 +55,29 @@
           });
 
           map.addLayer({
-  id: 'my-layer',
-  type: 'circle',
-  source: 'my-data',
-  paint: {
-    'circle-radius': 6,
-    'circle-color': '#ffffff', // set the fill color to white
-    'circle-stroke-color': 'green', // set the border color to red
-    'circle-stroke-width': 2, // set the border width
-  }
-});
+            id: "my-layer",
+            type: "circle",
+            source: "my-data",
+            paint: {
+              "circle-radius": 6,
+              "circle-color": "#ffffff", // set the fill color to white
+              "circle-stroke-color": "green", // set the border color to green
+              "circle-stroke-width": 2, // set the border width
+            },
+          });
+          map.on("click", "my-layer", (e) => {
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const description = e.features[0].properties.address;
+
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+              coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+
+            new mapboxgl.Popup()
+              .setLngLat(coordinates)
+              .setHTML(description)
+              .addTo(map);
+          });
         });
       </script>
     </div>
