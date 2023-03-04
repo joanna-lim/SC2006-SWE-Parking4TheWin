@@ -1,0 +1,16 @@
+{% extends "base.html" %} {% block title %}Posted Rewards{% endblock %} {% block
+content %}
+
+<h1 align="center">Posted Rewards</h1>
+<ul class="list-group list-group-flush" id="rewards">
+  {% for reward in rewards %}
+  {% if reward.company == user %}
+  <li class="list-group-item">
+    <p> {{ reward.reward_title }} </p>
+    <button type="button" class="close"">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </li>
+  {% endif %}
+  {% endfor %} {% endblock %}
+</ul>

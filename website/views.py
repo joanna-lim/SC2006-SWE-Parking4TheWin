@@ -50,7 +50,7 @@ def home():
     abs_path = os.path.abspath('carparks.geojson')
     print(f"GeoJSON file saved to: {abs_path}")
 
-    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY)
+    return render_template("rhome.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY)
 
 @views.route('/coe-registration', methods=['GET', 'POST'])
 @role_required('driver')
@@ -91,3 +91,10 @@ def rewards_creation():
         db.session.add(new_reward) 
         db.session.commit()
     return render_template("rewards_creation.html", user=current_user)
+
+@views.route('/posted-rewards', methods=['GET', 'POST'])
+@role_required('corporate')
+def posted_rewards():
+    rewards = Reward.query.all()
+    return render_template("posted_rewards.html", user=current_user, rewards=rewards)
+
