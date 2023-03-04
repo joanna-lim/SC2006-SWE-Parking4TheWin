@@ -103,14 +103,14 @@ def generate_geojson():
     features = []
     for carpark in carparks:
         feature = {
-            'type': 'Feature',
             'geometry': {
                 'type': 'Point',
                 'coordinates': [carpark.longitude, carpark.latitude]
             },
             'properties': {
                 'address': carpark.address
-            }
+            },
+            'type': "Feature"
         }
         features.append(feature)
 
@@ -119,7 +119,7 @@ def generate_geojson():
         'features': features
     }
     json_str = json.dumps(geojson)
-    with open('carparks.geojson', 'w') as f:
+    with open(os.path.join('website', 'carparks.geojson'), 'w') as f:
         f.write(json_str)
     abs_path = os.path.abspath('carparks.geojson')
     print(f"GeoJSON file saved to: {abs_path}")

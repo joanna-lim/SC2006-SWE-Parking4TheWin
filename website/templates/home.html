@@ -49,28 +49,22 @@
         });
 
         map.on("load", function () {
-          map.addSource("places", {
+          map.addSource("my-data", {
             type: "geojson",
-            data: "/carparks.geojson",
+            data: "https://joanna-lim.github.io/carparks-geojson-data/carparks.geojson",
           });
 
           map.addLayer({
-            id: "places",
-            type: "circle",
-            source: "places",
-            paint: {
-              "circle-radius": 6,
-              "circle-color": "#4264fb",
-            },
-          });
-
-          map.on("mouseenter", "places", function () {
-            map.getCanvas().style.cursor = "pointer";
-          });
-
-          map.on("mouseleave", "places", function () {
-            map.getCanvas().style.cursor = "";
-          });
+  id: 'my-layer',
+  type: 'circle',
+  source: 'my-data',
+  paint: {
+    'circle-radius': 6,
+    'circle-color': '#ffffff', // set the fill color to white
+    'circle-stroke-color': 'green', // set the border color to red
+    'circle-stroke-width': 2, // set the border width
+  }
+});
         });
       </script>
     </div>
