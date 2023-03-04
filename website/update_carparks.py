@@ -12,7 +12,6 @@ def svy21_to_wgs84(x, y):
         svy21_to_wgs84.transformer = pyproj.Transformer.from_crs(svy21_to_wgs84.svy21, svy21_to_wgs84.wgs84)
         x, y = svy21_to_wgs84.transformer.transform(x, y)
     return y, x
-
     
 # Format the carpark information to match the database
 def format_carpark_information(record):
@@ -94,6 +93,36 @@ def update_carparks():
             db.session.add(carpark)
     
     db.session.commit()
+
+def generate_geojson():
+    from . import db
+    from .models import CarPark
+    import os
+    print("XXXXX Generating GeoJSON XXXXX")
+    carparks = CarPark.query.all()
+    features = []
+    for carpark in carparks:
+        feature = {
+            'type': 'Feature',
+            'geometry': {
+                'type': 'Point',
+                'coordinates': [carpark.longitude, carpark.latitude]
+            },
+            'properties': {
+                'address': carpark.address
+            }
+        }
+        features.append(feature)
+
+    geojson = {
+        'type': 'FeatureCollection',
+        'features': features
+    }
+    json_str = json.dumps(geojson)
+    with open('carparks.geojson', 'w') as f:
+        f.write(json_str)
+    abs_path = os.path.abspath('carparks.geojson')
+    print(f"GeoJSON file saved to: {abs_path}")
 
 def update_carparks_availability():
     print("XXXXX Updating carparks availability XXXXX")

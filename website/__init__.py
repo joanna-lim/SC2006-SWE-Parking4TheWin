@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
 from flask_login import LoginManager
-from .update_carparks import update_carparks, update_carparks_availability
+from .update_carparks import update_carparks, update_carparks_availability, generate_geojson
 
 
 db = SQLAlchemy()
@@ -26,6 +26,7 @@ def create_app():
         db.create_all()
         update_carparks()
         update_carparks_availability()
+        generate_geojson()
     
     login_manager = LoginManager()
     login_manager.login_view = 'auth.driver_login'

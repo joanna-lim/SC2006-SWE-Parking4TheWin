@@ -17,30 +17,6 @@ views = Blueprint('views', __name__)
 @views.route('/', methods=['GET', 'POST'])
 @role_required('driver')
 def home():
-    carparks = CarPark.query.all()
-    features = []
-    for carpark in carparks:
-        feature = {
-            'type': 'Feature',
-            'geometry': {
-                'type': 'Point',
-                'coordinates': [carpark.longitude, carpark.latitude]
-            },
-            'properties': {
-                'address': carpark.address
-            }
-        }
-        features.append(feature)
-
-    geojson = {
-        'type': 'FeatureCollection',
-        'features': features
-    }
-    json_str = json.dumps(geojson)
-    with open('carparks.geojson', 'w') as f:
-        f.write(json_str)
-    abs_path = os.path.abspath('carparks.geojson')
-    print(f"GeoJSON file saved to: {abs_path}")
 
     return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY)
 
