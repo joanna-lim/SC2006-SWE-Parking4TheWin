@@ -19,26 +19,18 @@ views = Blueprint('views', __name__)
 def home():
     carparks = CarPark.query.all()
     features = []
-    i = 0
     for carpark in carparks:
-        i +=1
-        api_endpoint = 'https://developers.onemap.sg/commonapi/convert/3414to4326?X=' + str(carpark.x_coord) + '&Y=' + str(carpark.y_coord)
-        response = requests.get(api_endpoint)
-        wgs84_latitude = response.json()['latitude']
-        wgs84_longitude = response.json()['longitude']
         feature = {
             'type': 'Feature',
             'geometry': {
                 'type': 'Point',
-                'coordinates': [wgs84_longitude, wgs84_latitude]
+                'coordinates': [carpark.longitude, carpark.latitude]
             },
             'properties': {
                 'address': carpark.address
             }
         }
         features.append(feature)
-        if i==25:
-            break
 
     geojson = {
         'type': 'FeatureCollection',
@@ -50,7 +42,7 @@ def home():
     abs_path = os.path.abspath('carparks.geojson')
     print(f"GeoJSON file saved to: {abs_path}")
 
-    return render_template("rhome.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY)
+    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY)
 
 @views.route('/coe-registration', methods=['GET', 'POST'])
 @role_required('driver')

@@ -36,18 +36,43 @@
       }
     </style>
     <div id="map">
-    <script MAPBOX_SECRET_KEY={{ MAPBOX_SECRET_KEY }}>
-      MAPBOX_SECRET_KEY =
-        document.currentScript.getAttribute("MAPBOX_SECRET_KEY");
-      mapboxgl.accessToken = MAPBOX_SECRET_KEY;
-      var map = new mapboxgl.Map({
-        container: "map",
-        // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
-        style: "mapbox://styles/mapbox/streets-v12",
-        center: [103.8198, 1.3521],
-        zoom: 12,
-      });
-    </script>
+      <script MAPBOX_SECRET_KEY= {{ MAPBOX_SECRET_KEY }}>
+        MAPBOX_SECRET_KEY =
+          document.currentScript.getAttribute("MAPBOX_SECRET_KEY");
+        mapboxgl.accessToken = MAPBOX_SECRET_KEY;
+        var map = new mapboxgl.Map({
+          container: "map",
+          // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+          style: "mapbox://styles/mapbox/streets-v12",
+          center: [103.8198, 1.3521],
+          zoom: 12,
+        });
+
+        map.on("load", function () {
+          map.addSource("places", {
+            type: "geojson",
+            data: "/carparks.geojson",
+          });
+
+          map.addLayer({
+            id: "places",
+            type: "circle",
+            source: "places",
+            paint: {
+              "circle-radius": 6,
+              "circle-color": "#4264fb",
+            },
+          });
+
+          map.on("mouseenter", "places", function () {
+            map.getCanvas().style.cursor = "pointer";
+          });
+
+          map.on("mouseleave", "places", function () {
+            map.getCanvas().style.cursor = "";
+          });
+        });
+      </script>
     </div>
   </body>
 </html>
