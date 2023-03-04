@@ -1,6 +1,19 @@
-import urllib.request
 import json
+import pyproj
+import urllib.request
 
+# (x, y) is also known as (easting, northing)
+def svy21_to_wgs84(x, y):
+    try:
+        x, y = svy21_to_wgs84.transformer.transform(x, y)
+    except AttributeError:
+        svy21_to_wgs84.svy21 = pyproj.CRS.from_proj4("+proj=tmerc +lat_0=1.366666666666667 +lon_0=103.83333333333333 +k_0=1.0 +x_0=28001.642 +y_0=38744.572 +ellps=WGS84 +units=m +no_defs")
+        svy21_to_wgs84.wgs84 = pyproj.CRS.from_proj4("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+        svy21_to_wgs84.transformer = pyproj.Transformer.from_crs(svy21_to_wgs84.svy21, svy21_to_wgs84.wgs84)
+        x, y = svy21_to_wgs84.transformer.transform(x, y)
+    return y, x
+
+    
 # Format the carpark information to match the database
 def format_carpark_information(record):
     fattributes = list()
@@ -50,27 +63,20 @@ def update_carparks():
             records.append(row)
 
     for record in records:
-        fattributes = format_carpark_information(record)
         carpark = CarPark.query.get(record[0])
 
-        if carpark:
-            carpark.address = fattributes[0]
-            carpark.x_coord = fattributes[1]
-            carpark.y_coord = fattributes[2]
-            carpark.car_park_type  = fattributes[3]
-            carpark.type_of_parking_system = fattributes[4]
-            carpark.short_term_parking = fattributes[5]
-            carpark.free_parking = fattributes[6]
-            carpark.night_parking = fattributes[7]
-            carpark.car_park_decks = fattributes[8]
-            carpark.gantry_height = fattributes[9]
-            carpark.car_park_basement = fattributes[10]
-        else:
+        # Will only create and fill the database if it hasn't been created yet, won't update
+        # May need to delete and run main.py again if you wan to update
+        if not carpark:
+            fattributes = format_carpark_information(record)
+            lat, lon = svy21_to_wgs84(fattributes[1], fattributes[2])
             carpark = CarPark(
                 car_park_no = record[0],
                 address = fattributes[0],
                 x_coord = fattributes[1],
                 y_coord = fattributes[2],
+                latitude = lat,
+                longitude = lon,
                 car_park_type  = fattributes[3],
                 type_of_parking_system = fattributes[4],
                 short_term_parking = fattributes[5],

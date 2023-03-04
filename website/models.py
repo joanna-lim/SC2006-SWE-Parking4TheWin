@@ -34,6 +34,8 @@ class CarPark(db.Model):
     address = db.Column(db.String(150))
     x_coord = db.Column(db.Float)
     y_coord = db.Column(db.Float)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
     car_park_type = db.Column(db.String(150))
     type_of_parking_system = db.Column(db.String(150))
     short_term_parking = db.Column(db.String(150))
