@@ -15,10 +15,12 @@ views = Blueprint('views', __name__)
 
 # driver views here
 @views.route('/', methods=['GET', 'POST'])
-@role_required('driver')
+# @role_required('driver')
 def home():
+    with open('website/carparks.json') as f:
+        data = json.loads(f.read())
 
-    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY)
+    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data)
 
 @views.route('/coe-registration', methods=['GET', 'POST'])
 @role_required('driver')

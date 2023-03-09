@@ -37,6 +37,8 @@
     </style>
     <div id="map">
       <script MAPBOX_SECRET_KEY={{ MAPBOX_SECRET_KEY }}>
+        var geojsonData = JSON.parse('{{ geojsonData|tojson|safe }}');
+
         MAPBOX_SECRET_KEY =
           document.currentScript.getAttribute("MAPBOX_SECRET_KEY");
         mapboxgl.accessToken = MAPBOX_SECRET_KEY;
@@ -51,7 +53,7 @@
         map.on("load", function () {
           map.addSource("my-data", {
             type: "geojson",
-            data: "https://joanna-lim.github.io/carparks-geojson-data/carparks.geojson",
+            data: geojsonData
           });
 
           map.addLayer({
