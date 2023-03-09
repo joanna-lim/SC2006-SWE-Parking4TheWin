@@ -7,7 +7,6 @@ from .models import *
 from datetime import datetime
 import json
 import os
-import requests
 
 MAPBOX_SECRET_KEY=os.getenv("MAPBOX_SECRET_KEY")
 
@@ -15,12 +14,12 @@ views = Blueprint('views', __name__)
 
 # driver views here
 @views.route('/', methods=['GET', 'POST'])
-# @role_required('driver')
+@role_required('driver')
 def home():
     with open('website/carparks.json') as f:
         data = json.loads(f.read())
 
-    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data)
+    return render_template("rhome.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data)
 
 @views.route('/coe-registration', methods=['GET', 'POST'])
 @role_required('driver')
@@ -60,6 +59,7 @@ def rewards_creation():
         new_reward = Reward(reward_title=reward_title, reward_expiry=reward_expiry, reward_details=reward_details, user_id= current_user.id)
         db.session.add(new_reward) 
         db.session.commit()
+        flash('Reward created!', category='success')
     return render_template("rewards_creation.html", user=current_user)
 
 @views.route('/posted-rewards', methods=['GET', 'POST'])
@@ -67,4 +67,15 @@ def rewards_creation():
 def posted_rewards():
     rewards = Reward.query.all()
     return render_template("posted_rewards.html", user=current_user, rewards=rewards)
+
+@views.route('/delete-reward', methods=['POST'])
+def delete_reward():
+    reward = json.loads(request.data)
+    rewardId = reward['rewardId']
+    reward = Reward.query.get(rewardId)
+    if reward:
+        if reward.user_id == current_user.id:
+            db.session.delete(reward)
+            db.session.commit()
+    return jsonify({})
 

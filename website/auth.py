@@ -14,10 +14,10 @@ def role_required(role):
             if not current_user.is_authenticated:
                 return redirect(url_for('auth.driver_login'))
             elif current_user.user_type=='driver' and role=='corporate':
-                flash('That URL is blocked for your account type!', category='error')
+                # flash('That URL is blocked for your account type!', category='error')
                 return redirect(url_for('views.home'))
             elif current_user.user_type=='corporate' and role=='driver':
-                flash('That URL is blocked for your account type!', category='error')
+                # flash('That URL is blocked for your account type!', category='error')
                 return redirect(url_for('views.rewards_creation'))
             return fn(*args, **kwargs)
         return decorated_view
