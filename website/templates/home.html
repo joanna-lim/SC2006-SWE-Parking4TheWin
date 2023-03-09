@@ -44,32 +44,38 @@
         mapboxgl.accessToken = MAPBOX_SECRET_KEY;
         var map = new mapboxgl.Map({
           container: "map",
-          // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
           style: "mapbox://styles/mapbox/streets-v12",
           center: [103.8198, 1.3521],
           zoom: 12,
         });
 
         map.on("load", function () {
-          map.addSource("my-data", {
+          map.addSource("carparks-data", {
             type: "geojson",
             data: geojsonData
           });
 
           map.addLayer({
-            id: "my-layer",
-            type: "circle",
-            source: "my-data",
-            paint: {
-              "circle-radius": 6,
-              "circle-color": "#ffffff", // set the fill color to white
-              "circle-stroke-color": "green", // set the border color to green
-              "circle-stroke-width": 2, // set the border width
-            },
-          });
-          map.on("click", "my-layer", (e) => {
+  id: "carparks-layer",
+  type: "circle",
+  source: "carparks-data",
+  paint: {
+    "circle-radius": 10,
+    "circle-color": [
+      "interpolate",
+      ["linear"],
+      ["get", "vacancy_percentage"],
+      0, "red", 
+      50, "yellow", 
+      100, "green" 
+    ],
+    "circle-opacity": 0.8
+  },
+});
+
+          map.on("click", "carparks-layer", (e) => {
             const coordinates = e.features[0].geometry.coordinates.slice();
-            const description = e.features[0].properties.address;
+            const description = e.features[0].properties.vacancy_percentage;
 
             while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
               coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;

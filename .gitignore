@@ -3,3 +3,4 @@ venv/
 .env
 *instance/database.db
 .DS_Store
+carparks.json/

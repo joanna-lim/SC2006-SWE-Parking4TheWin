@@ -101,21 +101,26 @@ def generate_geojson():
     print("XXXXX Generating GeoJSON XXXXX")
     carparks = CarPark.query.all()
     features = []
-    i=0
     for carpark in carparks:
+        if carpark.lots_available is None or carpark.total_lots is None or carpark.total_lots==0:
+            continue
         feature = {
             'geometry': {
                 'type': 'Point',
                 'coordinates': [carpark.longitude, carpark.latitude]
             },
             'properties': {
-                'address': carpark.address
+                'address': carpark.address,
+                'total_lots': carpark.total_lots,
+                'lots_available': carpark.lots_available,
+                'vacancy_percentage': int((carpark.lots_available/carpark.total_lots)*100),
+                'car_park_type': carpark.car_park_type,
+                'type_of_parking_system': carpark.type_of_parking_system,
+                'free_parking': carpark.free_parking
             },
             'type': "Feature"
         }
         features.append(feature)
-        if i==25:
-                break
 
     geojson = {
         'type': 'FeatureCollection',
