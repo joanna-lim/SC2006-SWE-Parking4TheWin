@@ -43,15 +43,15 @@ def coe_registration():
             db.session.add(new_vehicle) 
             db.session.commit()
             flash("Vehicle registered successfully!", "success")
-            return redirect(url_for('views.coe_registered'))
+            return redirect(url_for('views.registered_vehicles'))
     return render_template("coe_registration.html", user=current_user)
 
-@views.route('/coe-registered', methods=['GET', 'POST'])
+@views.route('/registered-vehicles', methods=['GET', 'POST'])
 @role_required('driver')
-def coe_registered():
+def registered_vehicles():
     vehicles = Vehicle.query.filter_by(user_id = current_user.id).all()
     if vehicles:
-        return render_template("coe_registered.html", user=current_user, vehicles = vehicles)
+        return render_template("registered_vehicles.html", user=current_user, vehicles = vehicles)
     else:
         flash("You don't have any vehicles registered with us!", "error")
         return redirect(url_for('views.coe_registration'))

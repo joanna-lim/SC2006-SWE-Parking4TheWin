@@ -13,7 +13,7 @@ function deleteVehicle(vehicleId) {
             method: 'POST',
             body: JSON.stringify({ vehicleId: vehicleId })
         }).then((_res) => {
-            window.location.href = "/coe-registered";
+            window.location.href = "/registered-vehicles";
         });
     }
 }
