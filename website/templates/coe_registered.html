@@ -1,40 +1,46 @@
-{% extends "base.html" %} {% block title %} COE Registered {% endblock %} {% block
-    content %}
-    <br>
-    <h3 align="center">Thank you for registering your COE</h3>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Eo_circle_green_checkmark.svg/2048px-Eo_circle_green_checkmark.svg.png" alt="image not found" class="center">
-    <style>
-    .center {
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      width: 10%;
-    }
-    </style>
-    <br>
-    <div class="container">
-    <table class="table table-striped-columns">
-        <tr>
-          <th>Name</th>
-          <th>Car plate</th>
-          <th>COE Expiry</th>
-        </tr>
-        {% for car in car %}
-        <tr>
-          <td>
-            {{car.full_name}}
-        </td>
-        <td>
-            {{car.car_plate}}
-          </td>
-          <td>
-            {{car.coe_expiry}}
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
+{% extends "base.html" %} {% block title %} COE Registered {% endblock %} {%
+block content %}
+<br />
+<h3 align="center">Thank you for registering your COE</h3>
+<img
+  src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Eo_circle_green_checkmark.svg/2048px-Eo_circle_green_checkmark.svg.png"
+  alt="image not found"
+  class="center"
+/>
+<style>
+  .center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 10%;
+  }
+</style>
+<br />
+<div class="container">
+  <table class="table table-striped-columns">
+    <tr>
+      <th>Name</th>
+      <th>Car plate</th>
+      <th>COE Expiry</th>
+      <th> </th>
+    </tr>
+    {% for vehicle in vehicles %}
+    <tr>
+      <td>{{vehicle.full_name}}</td>
+      <td>{{vehicle.car_plate}}</td>
+      <td>{{vehicle.coe_expiry}}</td>
+      <td>
+        <button
+          type="button"
+          class="close"
+          onClick="deleteVehicle({{ vehicle.id }})"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
 
-    </div>
-
-    {% endblock %}
-    
+{% endblock %}

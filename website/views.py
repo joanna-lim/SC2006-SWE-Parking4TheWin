@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, flash, jsonify
-from flask_login import login_required, current_user
+from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
+from flask_login import current_user
 from . import db
 from .auth import role_required
 from functools import wraps
@@ -21,7 +21,6 @@ def real_home():
 
     return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data)
 
-# driver views here
 @views.route('/', methods=['GET', 'POST'])
 @role_required('driver')
 def home():
@@ -38,25 +37,37 @@ def coe_registration():
         new_vehicle = Vehicle(full_name=full_name, car_plate=car_plate, coe_expiry=coe_expiry, user_id=current_user.id)
         db.session.add(new_vehicle) 
         db.session.commit()
-        car = Vehicle.query.filter_by(user_id = current_user.id).all()
-        return render_template("coe_registered.html", user=current_user, car=car)
-    car = Vehicle.query.filter_by(user_id = current_user.id).all()
-    return render_template("coe_registration.html", user=current_user, car=car)
+        vehicles = Vehicle.query.filter_by(user_id = current_user.id).all()
+        flash("Vehicle registered successfully!")
+        return redirect(url_for('views.coe_registered'))
+    return render_template("coe_registration.html", user=current_user)
 
 @views.route('/coe-registered', methods=['GET', 'POST'])
 @role_required('driver')
 def coe_registered():
-    car = Vehicle.query.filter_by(user_id = current_user.id).all()
-    exists = db.session.query(db.exists().where(Vehicle.user_id == current_user.id)).scalar()
-    if exists == True:
-        return render_template("coe_registered.html", user=current_user, car=car)
-    return render_template("coe_registeration.html", user=current_user)
+    vehicles = Vehicle.query.filter_by(user_id = current_user.id).all()
+    if vehicles:
+        return render_template("coe_registered.html", user=current_user, vehicles = vehicles)
+    else:
+        flash("You don't have any vehicles registered with us!", "error")
+        return redirect(url_for('views.coe_registration'))
 
 @views.route('/view-rewards', methods=['GET', 'POST'])
 @role_required('driver')
 def view_rewards():
     rewards = Reward.query.all()
     return render_template("view_rewards.html", user=current_user, rewards=rewards)
+
+@views.route('/delete-vehicle', methods=['POST'])
+def delete_vehicle():
+    vehicle = json.loads(request.data)
+    vehicleId = vehicle['vehicleId']
+    vehicle = Vehicle.query.get(vehicleId)
+    if vehicle:
+        if vehicle.user_id == current_user.id:
+            db.session.delete(vehicle)
+            db.session.commit()
+    return jsonify({})
 
 # corporate views here
 @views.route('/rewards-creation', methods=['GET', 'POST'])

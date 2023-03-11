@@ -4,8 +4,7 @@ content %}
 <br />
 <h3 align="center">Posted Rewards</h3>
 <ul class="list-group list-group-flush" id="rewards">
-  {% for reward in rewards %}
-  {% if reward.company == user %}
+  {% for reward in rewards %} {% if reward.company == user %}
   <li class="list-group-item">
     <button type="button" class="close" onClick="deleteReward({{ reward.id }})">
       <span aria-hidden="true">&times;</span>
@@ -17,6 +16,5 @@ content %}
       <p>Expiry: {{reward.reward_expiry}}</p>
     </div>
   </li>
-  {% endif %}
-  {% endfor %} {% endblock %}
+  {% endif %} {% endfor %} {% endblock %}
 </ul>

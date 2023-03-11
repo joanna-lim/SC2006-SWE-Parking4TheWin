@@ -6,3 +6,14 @@ function deleteReward(rewardId) {
         window.location.href="/posted-rewards";
     });
 }
+
+function deleteVehicle(vehicleId) {
+    if (confirm("Are you sure you want to delete this vehicle?")) {
+        fetch('/delete-vehicle', {
+            method: 'POST',
+            body: JSON.stringify({ vehicleId: vehicleId })
+        }).then((_res) => {
+            window.location.href = "/coe-registered";
+        });
+    }
+}
