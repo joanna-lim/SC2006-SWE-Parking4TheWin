@@ -34,12 +34,16 @@ def coe_registration():
         car_plate = request.form.get('carPlate')
         coe_expiry_html = request.form.get('coeExpiry')
         coe_expiry = datetime.strptime(coe_expiry_html, '%Y-%m-%d').date()
-        new_vehicle = Vehicle(full_name=full_name, car_plate=car_plate, coe_expiry=coe_expiry, user_id=current_user.id)
-        db.session.add(new_vehicle) 
-        db.session.commit()
-        vehicles = Vehicle.query.filter_by(user_id = current_user.id).all()
-        flash("Vehicle registered successfully!")
-        return redirect(url_for('views.coe_registered'))
+
+        vehicle =  Vehicle.query.filter_by(car_plate=car_plate).first()
+        if vehicle:
+            flash('Vehicle with this car plate has already been registered!', category='error')
+        else: 
+            new_vehicle = Vehicle(full_name=full_name, car_plate=car_plate, coe_expiry=coe_expiry, user_id=current_user.id)
+            db.session.add(new_vehicle) 
+            db.session.commit()
+            flash("Vehicle registered successfully!", "success")
+            return redirect(url_for('views.coe_registered'))
     return render_template("coe_registration.html", user=current_user)
 
 @views.route('/coe-registered', methods=['GET', 'POST'])
