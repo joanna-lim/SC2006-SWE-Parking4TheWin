@@ -16,47 +16,62 @@ searchForm.addEventListener("submit", function (event) {
   search();
 });
 
-function search() {
+function search(coordinates = null) {
   var location = locationInput.value;
   var radius = radiusInput.value || "2";
 
-  var url =
-    "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
-    encodeURIComponent(location) +
-    ".json?access_token=" +
-    mapboxgl.accessToken +
-    "&country=sg&proximity=103.8198,1.3521";
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      var coordinates = data.features[0].center;
-      var placeName = data.features[0].place_name;
-      map.setCenter(coordinates);
+  // use provided coordinates if available
+  if (coordinates !== null) {
+    map.setCenter(coordinates);
+  } else {
+    var url =
+      "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
+      encodeURIComponent(location) +
+      ".json?access_token=" +
+      mapboxgl.accessToken +
+      "&country=sg&proximity=103.8198,1.3521";
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        var coordinates = data.features[0].center;
+        var placeName = data.features[0].place_name;
+        map.setCenter(coordinates);
 
-      if (searchMarker !== null) {
-        searchMarker.remove();
-      }
+        if (searchMarker !== null) {
+          searchMarker.remove();
+        }
 
-      searchMarker = new mapboxgl.Marker().setLngLat(coordinates).setPopup(new mapboxgl.Popup({ offset: 25 })
-      .setHTML("<p><strong>Your Search: </strong>" + placeName + "</p>")
-    ).addTo(map);
+        searchMarker = new mapboxgl.Marker()
+          .setLngLat(coordinates)
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setHTML(
+              "<p><strong>Your Search: </strong>" + placeName + "</p>"
+            )
+          )
+          .addTo(map);
+      })
+      .catch((error) => console.error(error));
+  }
 
-      const radiusInKm = parseFloat(radius);
-      const radiusInDegrees = radiusInKm / 111.32;
+  const radiusInKm = parseFloat(radius);
+  const radiusInDegrees = radiusInKm / 111.32;
 
-      const bounds = new mapboxgl.LngLatBounds()
-        .extend([
-          coordinates[0] + radiusInDegrees,
-          coordinates[1] + radiusInDegrees,
-        ])
-        .extend([
-          coordinates[0] - radiusInDegrees,
-          coordinates[1] - radiusInDegrees,
-        ]);
-      map.fitBounds(bounds);
-    })
-    .catch((error) => console.error(error));
+  const bounds = new mapboxgl.LngLatBounds()
+    .extend([
+      coordinates[0] + radiusInDegrees,
+      coordinates[1] + radiusInDegrees,
+    ])
+    .extend([
+      coordinates[0] - radiusInDegrees,
+      coordinates[1] - radiusInDegrees,
+    ]);
+  map.fitBounds(bounds);
 }
+
+radiusInput.addEventListener("input", function () {
+  const center = map.getCenter().toArray();
+  search(center);
+});
 
 map.on("load", function () {
   map.addSource("carparks-data", {
@@ -102,5 +117,21 @@ map.on("load", function () {
     `;
 
     new mapboxgl.Popup().setLngLat(coordinates).setHTML(description).addTo(map);
+  });
+
+  map.on("zoom", function () {
+    const zoom = map.getZoom();
+
+    map.setPaintProperty("carparks-layer", "circle-opacity", [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      10,
+      0,
+      14,
+      0.6,
+      18,
+      1,
+    ]);
   });
 });
