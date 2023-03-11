@@ -38,14 +38,19 @@ def coe_registration():
         new_vehicle = Vehicle(full_name=full_name, car_plate=car_plate, coe_expiry=coe_expiry, user_id=current_user.id)
         db.session.add(new_vehicle) 
         db.session.commit()
-        return render_template("coe_registered.html", user=current_user)
-    return render_template("coe_registration.html", user=current_user)
+        car = Vehicle.query.filter_by(user_id = current_user.id).all()
+        return render_template("coe_registered.html", user=current_user, car=car)
+    car = Vehicle.query.filter_by(user_id = current_user.id).all()
+    return render_template("coe_registration.html", user=current_user, car=car)
 
-@views.route('/coe-registration', methods=['GET', 'POST'])
+@views.route('/coe-registered', methods=['GET', 'POST'])
 @role_required('driver')
 def coe_registered():
-    car = Vehicle.query.all()
-    return render_template("coe_registered.html", user=current_user)
+    car = Vehicle.query.filter_by(user_id = current_user.id).all()
+    exists = db.session.query(db.exists().where(Vehicle.user_id == current_user.id)).scalar()
+    if exists == True:
+        return render_template("coe_registered.html", user=current_user, car=car)
+    return render_template("coe_registeration.html", user=current_user)
 
 @views.route('/view-rewards', methods=['GET', 'POST'])
 @role_required('driver')
