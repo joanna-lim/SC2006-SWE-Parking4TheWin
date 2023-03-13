@@ -116,7 +116,7 @@ def generate_geojson():
                 'vacancy_percentage': int((carpark.lots_available/carpark.total_lots)*100),
                 'car_park_type': carpark.car_park_type,
                 'type_of_parking_system': carpark.type_of_parking_system,
-                'free_parking': carpark.free_parking
+                'free_parking': carpark.free_parking,
             },
             'type': "Feature"
         }

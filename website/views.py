@@ -18,8 +18,12 @@ views = Blueprint('views', __name__)
 def real_home():
     with open('website/carparks.json') as f:
         data = json.loads(f.read())
+    has_vehicle = False
+    vehicles = Vehicle.query.filter_by(user_id = current_user.id).all()
+    if vehicles:
+        has_vehicle = True
 
-    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data)
+    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle)
 
 @views.route('/', methods=['GET', 'POST'])
 @role_required('driver')
@@ -104,4 +108,3 @@ def delete_reward():
             db.session.delete(reward)
             db.session.commit()
     return jsonify({})
-
