@@ -13,7 +13,8 @@ content %}
       <h4>{{ reward.reward_title }}</h4>
       <p>Company: {{ reward.company.company_name}}</p>
       <p>Details: {{ reward.reward_details }}</p>
-      <p>Expiry: {{reward.reward_expiry}}</p>
+      <p> Category: {{ reward.reward_category }}</p>
+      <p> Expiry: {{reward.reward_expiry}}</p>
     </div>
   </li>
   {% endif %} {% endfor %} {% endblock %}
