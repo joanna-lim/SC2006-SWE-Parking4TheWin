@@ -26,8 +26,11 @@ class Reward(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     reward_title = db.Column(db.String(150))
     reward_expiry = db.Column(db.Date)
+    reward_category = db.Column(db.String(50))
     reward_details = db.Column(db.String(10000))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    number_of_rewards = db.Column(db.Integer)
+    cost_of_reward = db.Column(db.Float)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # this user_id is the company that created the reward (NOT CLAIMANTS)
     company = db.relationship('User', backref='company')
 
 class CarPark(db.Model):
