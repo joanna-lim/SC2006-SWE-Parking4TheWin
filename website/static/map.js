@@ -105,8 +105,7 @@ map.on("load", function () {
     },
   });
 
-
-  const addCarpark=(address)=> {
+  window.addCarpark=function(address) {
     console.log("whatsup")
     fetch('/update-interested-carpark', {
       method: 'POST',
@@ -116,7 +115,7 @@ map.on("load", function () {
       body: JSON.stringify({ carpark_address: address })
     })
     .then(() => {
-      // window.location.href = '/map';
+      window.location.href = '/map';
     })
     .catch((error) => console.error(error));
   };
@@ -127,8 +126,13 @@ map.on("load", function () {
     const address = properties.address;
     const lotsAvailable = properties.lots_available;
     const vacancyPercentage = properties.vacancy_percentage;
-    const userId = window.userId; 
-    const interestedButtonText = "I'm Interested";
+    const carParkNo = properties.car_park_no;
+    const interestedCarpark = window.interestedCarpark;
+
+    var interestedButtonText = "I'm interested";
+    if (carParkNo == interestedCarpark) {
+      interestedButtonText = "I'm no longer interested";
+    }
 
     while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
       coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
@@ -141,13 +145,12 @@ map.on("load", function () {
       <p><strong>Vacancy Percentage:</strong> ${vacancyPercentage}%</p>
       `
       if (window.hasVehicle) {
-        desc = desc + `<button type="button" onClick=${addCarpark(address)}>${interestedButtonText}</button>`
+        desc = desc + `<button type="button" onClick="addCarpark('${address}')">${interestedButtonText}</button>`;
       }
       return desc
     }
 
-
-  const popup = new mapboxgl.Popup().setLngLat(coordinates).setHTML(description()).addTo(map);
+    new mapboxgl.Popup().setLngLat(coordinates).setHTML(description()).addTo(map);
 });
 
   map.on("zoom", function () {

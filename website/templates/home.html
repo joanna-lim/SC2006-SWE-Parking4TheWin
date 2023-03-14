@@ -111,7 +111,7 @@
       <script>
         var MAPBOX_SECRET_KEY = '{{ MAPBOX_SECRET_KEY }}';
         var geojsonData = JSON.parse('{{ geojsonData|tojson|safe }}');
-        var userId = '{{ user.id }}';
+        var interestedCarpark = '{{ interested_carpark }}'
         var hasVehicle = {{ has_vehicle|lower }};
       </script>
       <script src="static/map.js"></script>

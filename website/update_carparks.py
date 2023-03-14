@@ -110,6 +110,7 @@ def generate_geojson():
                 'coordinates': [carpark.longitude, carpark.latitude]
             },
             'properties': {
+                'car_park_no': carpark.car_park_no,
                 'address': carpark.address,
                 'total_lots': carpark.total_lots,
                 'lots_available': carpark.lots_available,

@@ -24,8 +24,8 @@ def real_home():
     vehicles = Vehicle.query.filter_by(user_id = current_user.id).all()
     if vehicles:
         has_vehicle = True
-
-    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle)
+    interested_carpark = current_user.interested_carpark
+    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle, interested_carpark=interested_carpark)
 
 @views.route('/', methods=['GET', 'POST'])
 @role_required('driver')
@@ -68,17 +68,6 @@ def view_rewards():
     rewards = Reward.query.all()
     return render_template("view_rewards.html", user=current_user, rewards=rewards)
 
-@views.route('/delete-vehicle', methods=['POST'])
-def delete_vehicle():
-    vehicle = json.loads(request.data)
-    vehicleId = vehicle['vehicleId']
-    vehicle = Vehicle.query.get(vehicleId)
-    if vehicle:
-        if vehicle.user_id == current_user.id:
-            db.session.delete(vehicle)
-            db.session.commit()
-    return jsonify({})
-
 # corporate views here
 @views.route('/rewards-creation', methods=['GET', 'POST'])
 @role_required('corporate')
@@ -94,6 +83,12 @@ def rewards_creation():
         flash('Reward created!', category='success')
     return render_template("rewards_creation.html", user=current_user)
 
+@views.route('/posted-rewards', methods=['GET', 'POST'])
+@role_required('corporate')
+def posted_rewards():
+    rewards = Reward.query.all()
+    return render_template("posted_rewards.html", user=current_user, rewards=rewards)
+
 # database related routes
 @views.route('/update-interested-carpark', methods=['POST'])
 def update_interested_carpark():
@@ -101,19 +96,28 @@ def update_interested_carpark():
     carpark_address = data['carpark_address']
     carpark = CarPark.query.filter_by(address=carpark_address).first()
     user = User.query.filter_by(id = current_user.id).first()
-    if carpark:
-        user.interested_carpark = carpark.car_park_no
-        carpark.interested_drivers.append(user)
+    if carpark.car_park_no==user.interested_carpark:
+        user.interested_carpark = None
         db.session.commit()
-        return jsonify({'success': True})
-    else:
+        return jsonify({})
+    elif carpark.car_park_no != user.interested_carpark:
+        user.interested_carpark = carpark.car_park_no
+        db.session.commit()
+        return jsonify({})
+    else: 
         return jsonify({'success': False})
 
-@views.route('/posted-rewards', methods=['GET', 'POST'])
-@role_required('corporate')
-def posted_rewards():
-    rewards = Reward.query.all()
-    return render_template("posted_rewards.html", user=current_user, rewards=rewards)
+
+@views.route('/delete-vehicle', methods=['POST'])
+def delete_vehicle():
+    vehicle = json.loads(request.data)
+    vehicleId = vehicle['vehicleId']
+    vehicle = Vehicle.query.get(vehicleId)
+    if vehicle:
+        if vehicle.user_id == current_user.id:
+            db.session.delete(vehicle)
+            db.session.commit()
+    return jsonify({})
 
 @views.route('/delete-reward', methods=['POST'])
 def delete_reward():
