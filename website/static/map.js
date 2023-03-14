@@ -127,6 +127,7 @@ map.on("load", function () {
     const lotsAvailable = properties.lots_available;
     const vacancyPercentage = properties.vacancy_percentage;
     const carParkNo = properties.car_park_no;
+    const noOfInterestedDrivers = properties.no_of_interested_drivers;
     const interestedCarpark = window.interestedCarpark;
 
     var interestedButtonText = "I'm interested";
@@ -143,6 +144,7 @@ map.on("load", function () {
       <p><strong>Address:</strong> ${address}</p>
       <p><strong>Lots Available:</strong> ${lotsAvailable}</p>
       <p><strong>Vacancy Percentage:</strong> ${vacancyPercentage}%</p>
+      <p><strong> No. of Interested Drivers: </strong> ${noOfInterestedDrivers}</p>
       `
       if (window.hasVehicle) {
         desc = desc + `<button type="button" onClick="addCarpark('${address}')">${interestedButtonText}</button>`;

@@ -52,3 +52,4 @@ class CarPark(db.Model):
     lot_info_last_updated = db.Column(db.String(150))
     # jona's additions 
     interested_drivers = db.relationship('User', backref='interested_carpark_obj')
+    no_of_interested_drivers = db.Column(db.Integer)
