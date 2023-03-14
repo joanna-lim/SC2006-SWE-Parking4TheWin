@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import current_user
 from . import db
 from .auth import role_required
-from functools import wraps
 from .models import *
+from .update_carparks import update_carparks_availability, generate_geojson
 from datetime import datetime
 import json
 import os
@@ -16,6 +16,8 @@ views = Blueprint('views', __name__)
 @views.route('/map', methods=['GET', 'POST'])
 @role_required('driver')
 def real_home():
+    update_carparks_availability()
+    generate_geojson()
     with open('website/carparks.json') as f:
         data = json.loads(f.read())
     has_vehicle = False
@@ -91,6 +93,21 @@ def rewards_creation():
         db.session.commit()
         flash('Reward created!', category='success')
     return render_template("rewards_creation.html", user=current_user)
+
+# database related routes
+@views.route('/update-interested-carpark', methods=['POST'])
+def update_interested_carpark():
+    data = json.loads(request.data)
+    carpark_address = data['carpark_address']
+    carpark = CarPark.query.filter_by(address=carpark_address).first()
+    user = User.query.filter_by(id = current_user.id).first()
+    if carpark:
+        user.interested_carpark = carpark.car_park_no
+        carpark.interested_drivers.append(user)
+        db.session.commit()
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False})
 
 @views.route('/posted-rewards', methods=['GET', 'POST'])
 @role_required('corporate')

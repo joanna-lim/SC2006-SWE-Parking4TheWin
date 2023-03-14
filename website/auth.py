@@ -96,7 +96,6 @@ def driver_sign_up():
             db.session.add(new_driver)
             db.session.commit()
             login_user(new_driver,remember=True)
-            flash('Account created! :)', category='success')
             return redirect(url_for('views.home'))
     return render_template("driver_sign_up.html", user=current_user)
         

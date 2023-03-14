@@ -1,5 +1,9 @@
 mapboxgl.accessToken = window.MAPBOX_SECRET_KEY;
 
+function displayValue() {
+  var radius = document.getElementById("radius-input").value;
+  document.getElementById("radius-value").innerHTML = radius;
+}
 var map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/streets-v12",
@@ -101,83 +105,50 @@ map.on("load", function () {
     },
   });
 
+
+  const addCarpark=(address)=> {
+    console.log("whatsup")
+    fetch('/update-interested-carpark', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ carpark_address: address })
+    })
+    .then(() => {
+      // window.location.href = '/map';
+    })
+    .catch((error) => console.error(error));
+  };
+
   map.on("click", "carparks-layer", (e) => {
     const coordinates = e.features[0].geometry.coordinates.slice();
     const properties = e.features[0].properties;
     const address = properties.address;
     const lotsAvailable = properties.lots_available;
     const vacancyPercentage = properties.vacancy_percentage;
+    const userId = window.userId; 
+    const interestedButtonText = "I'm Interested";
+
     while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
       coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
     }
-
-    const description = `
+    
+    const description = () => {
+      let desc = `
       <p><strong>Address:</strong> ${address}</p>
       <p><strong>Lots Available:</strong> ${lotsAvailable}</p>
       <p><strong>Vacancy Percentage:</strong> ${vacancyPercentage}%</p>
-      ${window.hasVehicle ? `<button id="interested-button">I'm Interested</button>` : ''}
-    `;
-
-    new mapboxgl.Popup().setLngLat(coordinates).setHTML(description).addTo(map);
-  });
-  // map.on("click", "carparks-layer", (e) => {
-  //   const coordinates = e.features[0].geometry.coordinates.slice();
-  //   const properties = e.features[0].properties;
-  //   const address = properties.address;
-  //   const lotsAvailable = properties.lots_available;
-  //   const vacancyPercentage = properties.vacancy_percentage;
-  //   while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-  //     coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-  //   }
-  //   const interestedDrivers = properties.interested_drivers || [];
-  //   const isInterested = interestedDrivers.includes(userId);
-
-  //   const button = document.createElement('button');
-  //   button.onclick = () => {
-  //     if (isInterested) {
-  //       const index = interestedDrivers.indexOf(userId);
-  //       if (index > -1) {
-  //         interestedDrivers.splice(index, 1);
-  //       }
-  //     } else {
-  //       interestedDrivers.push(userId);
-  //     }
-  //   };
-
-  //   button.innerText = isInterested ? `I'm no longer interested (${interestedDrivers.length})` : `I'm interested (${interestedDrivers.length})`;
-  //   button.onclick = () => {
-  //     if (isInterested) {
-  //       const index = interestedDrivers.indexOf(userId);
-  //       if (index > -1) {
-  //         interestedDrivers.splice(index, 1);
-  //       }
-  //     } else {
-  //       interestedDrivers.push(userId);
-  //     }
-  //     button.innerText = isInterested ? `I'm interested (${interestedDrivers.length})` : `I'm no longer interested (${interestedDrivers.length})`
-  //     map.getSource('carparks').setData({
-  //       type: 'FeatureCollection',
-  //       features: [{
-  //         ...feature,
-  //         properties: {
-  //           ...feature.properties,
-  //           interested_drivers: interestedDrivers,
-  //         },
-  //       }],
-  //     });
-  //     console.log(interestedDrivers);
-  //   };
-
-  //   const description = `
-  //     <p><strong>Address:</strong> ${address}</p>
-  //     <p><strong>Lots Available:</strong> ${lotsAvailable}</p>
-  //     <p><strong>Vacancy Percentage:</strong> ${vacancyPercentage}%</p>
-  //     ${window.hasVehicle ? button.outerHTML : ''}
-  //   `;
+      `
+      if (window.hasVehicle) {
+        desc = desc + `<button type="button" onClick=${addCarpark(address)}>${interestedButtonText}</button>`
+      }
+      return desc
+    }
 
 
-  //   new mapboxgl.Popup().setLngLat(coordinates).setHTML(description).addTo(map);
-  // });
+  const popup = new mapboxgl.Popup().setLngLat(coordinates).setHTML(description()).addTo(map);
+});
 
   map.on("zoom", function () {
     const zoom = map.getZoom();

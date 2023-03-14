@@ -10,6 +10,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(150), unique=True)
     first_name = db.Column(db.String(150))
     vehicles = db.relationship('Vehicle')
+    interested_carpark = db.Column(db.String, db.ForeignKey('carpark.car_park_no'))
     # for companies
     company_name = db.Column(db.String(150))
     uen = db.Column(db.String(150), unique=True)
@@ -30,6 +31,7 @@ class Reward(db.Model):
     company = db.relationship('User', backref='company')
 
 class CarPark(db.Model):
+    __tablename__ = 'carpark'
     car_park_no = db.Column(db.String, primary_key=True)
     address = db.Column(db.String(150))
     x_coord = db.Column(db.Float)
@@ -48,3 +50,5 @@ class CarPark(db.Model):
     lots_available = db.Column(db.Integer)
     lot_type = db.Column(db.String(1))
     lot_info_last_updated = db.Column(db.String(150))
+    # jona's additions 
+    interested_drivers = db.relationship('User', backref='interested_carpark_obj')
