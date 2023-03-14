@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import current_user
 from . import db
 from .auth import role_required
-from functools import wraps
 from .models import *
+from .update_carparks import update_carparks_availability, generate_geojson
 from datetime import datetime
 import json
 import os
@@ -16,14 +16,16 @@ views = Blueprint('views', __name__)
 @views.route('/map', methods=['GET', 'POST'])
 @role_required('driver')
 def real_home():
+    update_carparks_availability()
+    generate_geojson()
     with open('website/carparks.json') as f:
         data = json.loads(f.read())
     has_vehicle = False
     vehicles = Vehicle.query.filter_by(user_id = current_user.id).all()
     if vehicles:
         has_vehicle = True
-
-    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle)
+    interested_carpark = current_user.interested_carpark
+    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle, interested_carpark=interested_carpark)
 
 @views.route('/', methods=['GET', 'POST'])
 @role_required('driver')
@@ -66,17 +68,6 @@ def view_rewards():
     rewards = Reward.query.all()
     return render_template("view_rewards.html", user=current_user, rewards=rewards)
 
-@views.route('/delete-vehicle', methods=['POST'])
-def delete_vehicle():
-    vehicle = json.loads(request.data)
-    vehicleId = vehicle['vehicleId']
-    vehicle = Vehicle.query.get(vehicleId)
-    if vehicle:
-        if vehicle.user_id == current_user.id:
-            db.session.delete(vehicle)
-            db.session.commit()
-    return jsonify({})
-
 # corporate views here
 @views.route('/rewards-creation', methods=['GET', 'POST'])
 @role_required('corporate')
@@ -97,6 +88,43 @@ def rewards_creation():
 def posted_rewards():
     rewards = Reward.query.all()
     return render_template("posted_rewards.html", user=current_user, rewards=rewards)
+
+# database related routes
+@views.route('/update-interested-carpark', methods=['POST'])
+def update_interested_carpark():
+    data = json.loads(request.data)
+    carpark_address = data['carpark_address']
+    carpark = CarPark.query.filter_by(address=carpark_address).first()
+    user = User.query.filter_by(id = current_user.id).first()
+    # user is removing interest from an old carpark
+    if carpark.car_park_no==user.interested_carpark:
+        user.interested_carpark = None
+        carpark.no_of_interested_drivers-=1
+        db.session.commit()
+        return jsonify({})
+    # user is indicating interest in a new carpark
+    elif carpark.car_park_no != user.interested_carpark:
+        if user.interested_carpark is not None:
+            old_carpark = CarPark.query.filter_by(car_park_no=user.interested_carpark).first()
+            old_carpark.no_of_interested_drivers-=1
+        user.interested_carpark = carpark.car_park_no
+        carpark.no_of_interested_drivers+=1
+        db.session.commit()
+        return jsonify({})
+    else: 
+        return jsonify({'success': False})
+
+
+@views.route('/delete-vehicle', methods=['POST'])
+def delete_vehicle():
+    vehicle = json.loads(request.data)
+    vehicleId = vehicle['vehicleId']
+    vehicle = Vehicle.query.get(vehicleId)
+    if vehicle:
+        if vehicle.user_id == current_user.id:
+            db.session.delete(vehicle)
+            db.session.commit()
+    return jsonify({})
 
 @views.route('/delete-reward', methods=['POST'])
 def delete_reward():

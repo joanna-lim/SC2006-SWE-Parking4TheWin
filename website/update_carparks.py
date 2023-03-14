@@ -88,7 +88,8 @@ def update_carparks():
                 total_lots = None,
                 lots_available = None,
                 lot_type = None,
-                lot_info_last_updated = None
+                lot_info_last_updated = None,
+                no_of_interested_drivers = 0
             )
             db.session.add(carpark)
     
@@ -110,6 +111,7 @@ def generate_geojson():
                 'coordinates': [carpark.longitude, carpark.latitude]
             },
             'properties': {
+                'car_park_no': carpark.car_park_no,
                 'address': carpark.address,
                 'total_lots': carpark.total_lots,
                 'lots_available': carpark.lots_available,
@@ -117,6 +119,7 @@ def generate_geojson():
                 'car_park_type': carpark.car_park_type,
                 'type_of_parking_system': carpark.type_of_parking_system,
                 'free_parking': carpark.free_parking,
+                'no_of_interested_drivers': carpark.no_of_interested_drivers
             },
             'type': "Feature"
         }
