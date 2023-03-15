@@ -114,8 +114,15 @@ map.on("load", function () {
       },
       body: JSON.stringify({ carpark_address: address })
     })
-    .then(() => {
-      window.location.href = '/map';
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        window.geojsonData = data.updatedgeojsondata;
+        map.getSource("carparks-data").setData({
+          type: "geojson",
+          ...window.geojsonData
+        });
+      }
     })
     .catch((error) => console.error(error));
   };
@@ -130,6 +137,7 @@ map.on("load", function () {
     const noOfInterestedDrivers = properties.no_of_interested_drivers;
     const interestedCarpark = window.interestedCarpark;
 
+    console.log(carParkNo, interestedCarpark);
     var interestedButtonText = "I'm interested";
     if (carParkNo == interestedCarpark) {
       interestedButtonText = "I'm no longer interested";
@@ -153,7 +161,7 @@ map.on("load", function () {
     }
 
     new mapboxgl.Popup().setLngLat(coordinates).setHTML(description()).addTo(map);
-});
+  });
 
   map.on("zoom", function () {
     const zoom = map.getZoom();
