@@ -105,7 +105,7 @@ map.on("load", function () {
     },
   });
 
-  window.addCarpark=function(address) {
+  window.addCarpark=function(address, carParkNo) {
     console.log("whatsup")
     fetch('/update-interested-carpark', {
       method: 'POST',
@@ -122,6 +122,20 @@ map.on("load", function () {
           type: "geojson",
           ...window.geojsonData
         });
+        
+        if (data.op_type == 1) { // User Clicked on "I'm interested" button.
+          window.interestedCarpark = carParkNo;
+          $("#mapboxgl-popup-content-button").text("I'm no longer interested.");
+          var i = Number($("#mapboxgl-popup-content-interested").text());
+          i++;
+          $("#mapboxgl-popup-content-interested").text(i);
+        } else { // User Clicked on "I'm no longer interested" button.
+          window.interestedCarpark = null;
+          $("#mapboxgl-popup-content-button").text("I'm interested.");
+          var i = Number($("#mapboxgl-popup-content-interested").text());
+          i--;
+          $("#mapboxgl-popup-content-interested").text(i);
+        }
       }
     })
     .catch((error) => console.error(error));
@@ -137,7 +151,6 @@ map.on("load", function () {
     const noOfInterestedDrivers = properties.no_of_interested_drivers;
     const interestedCarpark = window.interestedCarpark;
 
-    console.log(carParkNo, interestedCarpark);
     var interestedButtonText = "I'm interested";
     if (carParkNo == interestedCarpark) {
       interestedButtonText = "I'm no longer interested";
@@ -152,12 +165,12 @@ map.on("load", function () {
       <p><strong>Address:</strong> ${address}</p>
       <p><strong>Lots Available:</strong> ${lotsAvailable}</p>
       <p><strong>Vacancy Percentage:</strong> ${vacancyPercentage}%</p>
-      <p><strong> No. of Interested Drivers: </strong> ${noOfInterestedDrivers}</p>
+      <p><strong> No. of Interested Drivers: </strong> <span id="mapboxgl-popup-content-interested">${noOfInterestedDrivers}</span></p>
       `
       if (window.hasVehicle) {
-        desc = desc + `<button type="button" onClick="addCarpark('${address}')">${interestedButtonText}</button>`;
+        desc = desc + `<button type="button" onClick="addCarpark('${address}','${carParkNo}')" id="mapboxgl-popup-content-button">${interestedButtonText}</button>`;
       }
-      return desc
+      return desc;
     }
 
     new mapboxgl.Popup().setLngLat(coordinates).setHTML(description()).addTo(map);

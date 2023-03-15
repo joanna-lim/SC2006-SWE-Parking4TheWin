@@ -106,22 +106,26 @@ def update_interested_carpark():
     user = User.query.filter_by(id = current_user.id).first()
 
     # user is removing interest from an old carpark
+    # op_type = 0 means user is removing interest
     if carpark.car_park_no==user.interested_carpark:
         user.interested_carpark = None
         carpark.no_of_interested_drivers-=1
+        op_type = 0
     # user is indicating interest in a new carpark
+    # op_type = 1 means user is indicating interest
     elif carpark.car_park_no != user.interested_carpark:
         if user.interested_carpark is not None:
             old_carpark = CarPark.query.filter_by(car_park_no=user.interested_carpark).first()
             old_carpark.no_of_interested_drivers-=1
         user.interested_carpark = carpark.car_park_no
         carpark.no_of_interested_drivers+=1
+        op_type = 1
     
     db.session.commit()
     generate_geojson()
     with open('website/carparks.json') as f:
         data = json.loads(f.read())
-    return jsonify(success=True, updatedgeojsondata=data)
+    return jsonify(success=True, op_type = op_type, updatedgeojsondata=data)
 
 
 @views.route('/delete-vehicle', methods=['POST'])
