@@ -43,7 +43,11 @@ def real_home():
     if interested_carpark:
         temp_carpark = CarPark.query.filter_by(car_park_no = interested_carpark).first()
         interested_carpark_coordinates = [temp_carpark.longitude, temp_carpark.latitude]
+
         return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle, interested_carpark=interested_carpark, interested_carpark_coordinates=interested_carpark_coordinates)
+    else:
+        return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle, interested_carpark=interested_carpark, interested_carpark_coordinates=[0,0])
+    
 @views.route('/', methods=['GET', 'POST'])
 @role_required('driver')
 def home():
