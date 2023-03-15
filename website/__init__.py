@@ -4,7 +4,6 @@ import os
 from flask_login import LoginManager
 from .update_carparks import update_carparks, update_carparks_availability, generate_geojson
 
-
 db = SQLAlchemy()
 DB_NAME = "database.db"
 

@@ -59,16 +59,11 @@
         #search-form button {
           font-size: 14px;
           padding: 8px 20px;
-          /* background-color: #007bff; */
           color: #fff;
           border: none;
           border-radius: 3px;
           transition: background-color 0.2s ease-in-out;
         }
-/* 
-      #search-form button:hover {
-        background-color: #0069d9;
-      } */
 
       .custom-sidebar {
         position: absolute;
@@ -111,8 +106,9 @@
       <script>
         var MAPBOX_SECRET_KEY = '{{ MAPBOX_SECRET_KEY }}';
         var geojsonData = JSON.parse('{{ geojsonData|tojson|safe }}');
-        var interestedCarpark = '{{ interested_carpark }}'
+        var interestedCarpark = '{{ interested_carpark }}';
         var hasVehicle = {{ has_vehicle|lower }};
+        var interestedCarparkCoordinates = {{ interested_carpark_coordinates }};
       </script>
       <script src="static/map.js"></script>
     </div>

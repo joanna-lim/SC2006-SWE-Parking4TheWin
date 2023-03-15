@@ -7,10 +7,21 @@ from .update_carparks import update_carparks_availability, generate_geojson
 from datetime import datetime
 import json
 import os
+import requests
 
 MAPBOX_SECRET_KEY=os.getenv("MAPBOX_SECRET_KEY")
 
 views = Blueprint('views', __name__)
+
+@views.route('/proxy/<path:url>')
+def proxy(url):
+    response = requests.get('https://api.mapbox.com/' + url, headers={'Origin': 'http://127.0.0.1:5000'})
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'GET',
+    }
+    return response.content, response.status_code, headers
 
 # driver views here
 @views.route('/map', methods=['GET', 'POST'])
@@ -18,15 +29,21 @@ views = Blueprint('views', __name__)
 def real_home():
     update_carparks_availability()
     generate_geojson()
+    
     with open('website/carparks.json') as f:
         data = json.loads(f.read())
+    
     has_vehicle = False
     vehicles = Vehicle.query.filter_by(user_id = current_user.id).all()
     if vehicles:
         has_vehicle = True
+    
     interested_carpark = current_user.interested_carpark
-    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle, interested_carpark=interested_carpark)
-
+    print(interested_carpark)
+    if interested_carpark:
+        temp_carpark = CarPark.query.filter_by(car_park_no = interested_carpark).first()
+        interested_carpark_coordinates = [temp_carpark.longitude, temp_carpark.latitude]
+        return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle, interested_carpark=interested_carpark, interested_carpark_coordinates=interested_carpark_coordinates)
 @views.route('/', methods=['GET', 'POST'])
 @role_required('driver')
 def home():

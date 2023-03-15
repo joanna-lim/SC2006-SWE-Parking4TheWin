@@ -1,9 +1,6 @@
 mapboxgl.accessToken = window.MAPBOX_SECRET_KEY;
 
-function displayValue() {
-  var radius = document.getElementById("radius-input").value;
-  document.getElementById("radius-value").innerHTML = radius;
-}
+// initialising of the map
 var map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/streets-v12",
@@ -11,21 +8,72 @@ var map = new mapboxgl.Map({
   zoom: 12,
 });
 
+// user inputs - location and radius 
 var searchForm = document.getElementById("search-form");
 var locationInput = document.getElementById("location-input");
 var radiusInput = document.getElementById("radius-input");
 var searchMarker = null;
 
+// radius input event listener 
+radiusInput.addEventListener("input", function () {
+  const center = map.getCenter().toArray();
+  search(center);
+});
+// submit button event listener
 searchForm.addEventListener("submit", function (event) {
   event.preventDefault();
   search();
 });
 
+function getRoute(coordinates) {
+  c1 = [coordinates[0], 90-coordinates[1]]
+  c2 = [window.interestedCarpark[0], 90-window.interestedCarpark[1]]
+
+  var url =
+    "proxy/directions/v5/mapbox/walking/" +
+    c1[0]
+    "," +
+    c1[1]
+    ";" +
+    c2[0]
+    "," +
+    c2[1] +
+    "?access_token=" +
+    mapboxgl.accessToken;
+
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+      var route = data.routes[0].geometry;
+      map.addLayer({
+        id: "route",
+        type: "line",
+        source: {
+          type: "geojson",
+          data: {
+            type: "Feature",
+            geometry: route,
+          },
+        },
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        paint: {
+          "line-color": "#888",
+          "line-width": 8,
+        },
+      });
+    })
+    .catch((error) => console.error(error));
+}
+
+// search function 
 function search(coordinates = null) {
   var location = locationInput.value;
   var radius = radiusInput.value || "2";
 
-  // use provided coordinates if available
+  // if coordinates are provided, we use coordinates, else, we use mapbox API to convert loctation and display
   if (coordinates !== null) {
     map.setCenter(coordinates);
   } else {
@@ -38,14 +86,19 @@ function search(coordinates = null) {
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        var coordinates = data.features[0].center;
+        var coordinates = data.features[0].center; 
+        
+        if (window.interestedCarpark != "None") {
+          getRoute(coordinates);
+        }
         var placeName = data.features[0].place_name;
         map.setCenter(coordinates);
 
+        // remove user's previously searched destination before placing new marker 
         if (searchMarker !== null) {
           searchMarker.remove();
         }
-
+        // search marker to display user's searched destination
         searchMarker = new mapboxgl.Marker()
           .setLngLat(coordinates)
           .setPopup(
@@ -73,17 +126,15 @@ function search(coordinates = null) {
   map.fitBounds(bounds);
 }
 
-radiusInput.addEventListener("input", function () {
-  const center = map.getCenter().toArray();
-  search(center);
-});
-
+// this is the JS code handling carpark data to be displayed 
 map.on("load", function () {
+  // adding carparks.json as a source
   map.addSource("carparks-data", {
     type: "geojson",
     data: window.geojsonData,
   });
 
+  // adding the source as a layer or colour-coded carparks based on vacancy percentage
   map.addLayer({
     id: "carparks-layer",
     type: "circle",
@@ -105,8 +156,8 @@ map.on("load", function () {
     },
   });
 
+  // the addcarpark function -> will be executed when user clickes on "I'm interested"
   window.addCarpark=function(address) {
-    console.log("whatsup")
     fetch('/update-interested-carpark', {
       method: 'POST',
       headers: {
@@ -120,6 +171,7 @@ map.on("load", function () {
     .catch((error) => console.error(error));
   };
 
+  // code that handles all carparks as popups 
   map.on("click", "carparks-layer", (e) => {
     const coordinates = e.features[0].geometry.coordinates.slice();
     const properties = e.features[0].properties;
@@ -153,11 +205,11 @@ map.on("load", function () {
     }
 
     new mapboxgl.Popup().setLngLat(coordinates).setHTML(description()).addTo(map);
-});
+  });
 
+  // code that handles the display of carpark circle layer --> the higher the zoom the clearer the carpark
   map.on("zoom", function () {
     const zoom = map.getZoom();
-
     map.setPaintProperty("carparks-layer", "circle-opacity", [
       "interpolate",
       ["linear"],
@@ -170,4 +222,6 @@ map.on("load", function () {
       1,
     ]);
   });
+  
 });
+
