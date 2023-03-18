@@ -1,4 +1,4 @@
-const mapboxgl.accessToken = window.MAPBOX_SECRET_KEY;
+mapboxgl.accessToken = window.MAPBOX_SECRET_KEY;
 
 var map = new mapboxgl.Map({
   container: "map",
