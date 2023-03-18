@@ -91,11 +91,11 @@ def rewards_creation():
         flash('Reward created!', category='success')
     return render_template("rewards_creation.html", user=current_user)
 
-@views.route('/posted-rewards', methods=['GET', 'POST'])
-@role_required('corporate')
-def posted_rewards():
-    rewards = Reward.query.all()
-    return render_template("posted_rewards.html", user=current_user, rewards=rewards)
+@views.route('/claim-points', methods=['GET', 'POST'])
+@role_required('driver')
+def claim_points():
+    user = User.query.all()
+    return render_template("claim_points.html", user=current_user)
 
 # database related routes
 @views.route('/update-interested-carpark', methods=['POST'])
@@ -149,3 +149,17 @@ def delete_reward():
             db.session.delete(reward)
             db.session.commit()
     return jsonify({})
+
+@views.route('/add-points', methods=['POST'])
+def add_points():
+    user = User.query.filter_by(id = current_user.id).first()
+    user.points+=10
+    db.session.commit()
+    return
+
+@views.route('/deduct-points', methods=['POST'])
+def deduct_points():
+    user = User.query.filter_by(id = current_user.id).first()
+    user.points-=10
+    db.session.commit()
+    return

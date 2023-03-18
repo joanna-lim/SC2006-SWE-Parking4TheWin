@@ -11,6 +11,7 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(150))
     vehicles = db.relationship('Vehicle')
     interested_carpark = db.Column(db.String, db.ForeignKey('carpark.car_park_no'))
+    points = db.Column(db.Integer)
     # for companies
     company_name = db.Column(db.String(150))
     uen = db.Column(db.String(150), unique=True)

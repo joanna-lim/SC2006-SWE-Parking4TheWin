@@ -19,3 +19,18 @@ function deleteVehicle(vehicleId) {
         });
     }
 }
+
+function addPoints(){
+    fetch('/add-points', {
+        method: 'POST',
+    }).then((_res) => {
+        window.location.href = "/claim-points";
+    });
+}
+function deductPoints(){
+    fetch('/deduct-points', {
+        method: 'POST',
+    }).then((_res) => {
+        window.location.href = "/claim-points";
+    });
+}

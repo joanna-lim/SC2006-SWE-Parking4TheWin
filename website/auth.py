@@ -92,7 +92,7 @@ def driver_sign_up():
             
         else:
             # add user to database
-            new_driver = User(email=email, first_name=first_name, password=generate_password_hash(password1,method='sha256'), user_type="driver")
+            new_driver = User(email=email, first_name=first_name, password=generate_password_hash(password1,method='sha256'), user_type="driver", points=0)
             db.session.add(new_driver)
             db.session.commit()
             login_user(new_driver,remember=True)
