@@ -191,4 +191,12 @@ map.on("load", function () {
       1,
     ]);
   });
+
+  map.on('mouseenter', 'carparks-layer', function () {
+    map.getCanvas().style.cursor = 'pointer';
+  });
+
+  map.on('mouseleave', 'carparks-layer', function () {
+    map.getCanvas().style.cursor = '';
+  });
 });

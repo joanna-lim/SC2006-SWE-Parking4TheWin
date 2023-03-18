@@ -1,122 +1,115 @@
-{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
-%}
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="initial-scale=1,maximum-scale=1,user-scalable=no"
-    />
-    <link
-      href="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css"
-      rel="stylesheet"
-    />
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: 'Roboto', sans-serif;
-      }
+{% extends "base.html" %}
 
-      #map {
-        position: absolute;
-        top: var(--navbar-min-height);
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        z-index: -1;
-      }
-      .mapboxgl-popup {
-        max-width: 200px;
-        font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
-      }
+{% block title %} Home {% endblock %}
 
-      #search-form {
-        margin: 5%;
-      } 
-      /* for some reason input range extrudes from the sidebar 
-         this is the fix*/
-      input[type="range"] {
-        width: 90%;
-      } 
+{% block headcontent %}
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
+  <link
+    href="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css"
+    rel="stylesheet"
+  />
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+    }
 
-      #search-form label {
+    #map {
+      position: absolute;
+      top: var(--navbar-min-height);
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: -1;
+    }
+    .mapboxgl-popup {
+      max-width: 200px;
+      font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
+    }
+
+    #search-form {
+      margin: 5%;
+    } 
+    /* for some reason input range extrudes from the sidebar 
+        this is the fix*/
+    input[type="range"] {
+      width: 90%;
+    } 
+
+    #search-form label {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    #search-form input {
+      font-size: 14px;
+      padding: 8px 10px;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+    }
+
+      #search-form button {
         font-size: 14px;
-        margin-bottom: 5px;
-      }
-
-      #search-form input {
-        font-size: 14px;
-        padding: 8px 10px;
+        padding: 8px 20px;
+        /* background-color: #007bff; */
+        color: #fff;
+        border: none;
         border-radius: 3px;
-        border: 1px solid #ddd;
-        margin-bottom: 10px;
+        transition: background-color 0.2s ease-in-out;
       }
+  /* 
+    #search-form button:hover {
+      background-color: #0069d9;
+    } */
 
-        #search-form button {
-          font-size: 14px;
-          padding: 8px 20px;
-          /* background-color: #007bff; */
-          color: #fff;
-          border: none;
-          border-radius: 3px;
-          transition: background-color 0.2s ease-in-out;
-        }
-/* 
-      #search-form button:hover {
-        background-color: #0069d9;
-      } */
+    .custom-sidebar {
+      position: absolute;
+      top: var(--navbar-min-height);
+      left: 0;
+      height: calc(100% - var(--navbar-min-height));
+      max-width: 30%;
+      min-width: 200px;
+      background-color: #f5f5f5;
+      padding: 20px;
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    }
 
-      .custom-sidebar {
-        position: absolute;
-        top: var(--navbar-min-height);
-        left: 0;
-        height: calc(100% - var(--navbar-min-height));
-        max-width: 30%;
-        min-width: 200px;
-        background-color: #f5f5f5;
-        padding: 20px;
-        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    .radius-wrapper {
+        display: flex;
+        align-items: center;
       }
+    .radius-wrapper label {
+      margin-right: 10px;
+    }
+  </style>
+{% endblock %}
 
-      .radius-wrapper {
-          display: flex;
-          align-items: center;
-        }
-      .radius-wrapper label {
-        margin-right: 10px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="custom-sidebar">
-      <form id="search-form">
-        <div class="form-group">
-          <label for="location-input col-form-label-sm">Location</label>
-          <input type="text" class="form-control form-control-sm" id="location-input">
+{% block content%}
+  <div class="custom-sidebar">
+    <form id="search-form">
+      <div class="form-group">
+        <label for="location-input col-form-label-sm">Location</label>
+        <input type="text" class="form-control form-control-sm" id="location-input">
+      </div>
+      <div class="form-group">
+        <div class="radius-wrapper">
+          <label for="radius-input col-form-label-sm">Radius</label>
+          <input type="range" min="1" max="10" step="0.1" id="radius-input">
         </div>
-        <div class="form-group">
-          <div class="radius-wrapper">
-            <label for="radius-input col-form-label-sm">Radius</label>
-            <input type="range" min="1" max="10" step="0.1" id="radius-input">
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary">Search</button> 
-      </form>
-    </div>
-    <div class="col" id="map">
-      <script>
-        var MAPBOX_SECRET_KEY = '{{ MAPBOX_SECRET_KEY }}';
-        var geojsonData = JSON.parse('{{ geojsonData|tojson|safe }}');
-        var interestedCarpark = '{{ interested_carpark }}';
-        var hasVehicle = {{ has_vehicle|lower }};
-      </script>
-      <script src="static/map.js"></script>
-    </div>
-  </body>
-</html>
-
+      </div>
+      <button type="submit" class="btn btn-primary">Search</button> 
+    </form>
+  </div>
+  <div id="map">
+    <script>
+      var MAPBOX_SECRET_KEY = '{{ MAPBOX_SECRET_KEY }}';
+      var geojsonData = JSON.parse('{{ geojsonData|tojson|safe }}');
+      var interestedCarpark = '{{ interested_carpark }}';
+      var hasVehicle = {{ has_vehicle|lower }};
+    </script>
+    <script src="static/map.js"></script>
+  </div>
 {% endblock %}
