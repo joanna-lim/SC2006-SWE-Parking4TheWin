@@ -7,7 +7,11 @@ content %}
   <li class="list-group-item">
     <div>
       <h4>{{ reward.reward_title }}</h4>
-      <p>Company: {{ reward.company.company_name}}</p>
+        {% for company in companies %}
+          {% if reward.user_id == company.user_id %}
+            <p>Company: {{company.company_name}}</p>
+          {% endif %}
+        {% endfor %}
       <p>Details: {{ reward.reward_details }}</p>
       <p>Expiry: {{reward.reward_expiry}}</p>
     </div>

@@ -4,16 +4,29 @@ import math
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    password = db.Column(db.String(150))
     user_type = db.Column(db.String(50))
     # for drivers
-    email = db.Column(db.String(150), unique=True)
-    first_name = db.Column(db.String(150))
+    drivers = db.relationship("Driver")
     vehicles = db.relationship('Vehicle')
-    interested_carpark = db.Column(db.String, db.ForeignKey('carpark.car_park_no'))
     # for companies
+    companys = db.relationship("Company")
+    
+
+class Driver(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(150), unique=True)
+    password = db.Column(db.String(150))
+    first_name = db.Column(db.String(150))
+    points = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    interested_carpark = db.Column(db.String, db.ForeignKey('carpark.car_park_no'))
+
+class Company(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     company_name = db.Column(db.String(150))
     uen = db.Column(db.String(150), unique=True)
+    password = db.Column(db.String(150))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
 
 class Vehicle(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,5 +67,5 @@ class CarPark(db.Model):
     lot_type = db.Column(db.String(1))
     lot_info_last_updated = db.Column(db.String(150))
     # jona's additions 
-    interested_drivers = db.relationship('User', backref='interested_carpark_obj')
+    interested_drivers = db.relationship('Driver', backref='interested_carpark_obj')
     no_of_interested_drivers = db.Column(db.Integer)
