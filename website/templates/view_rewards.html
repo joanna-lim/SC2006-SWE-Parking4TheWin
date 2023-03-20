@@ -2,18 +2,33 @@
 content %}
 </br>
 <h3 align="center">View Rewards</h3>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div style="text-align: center; border-radius: 30px; border: 2px solid black; padding: 5px; background-color: #a2c0d5; box-shadow: 0 0 2px rgba(0,0,0,0.3);">
+        <p><strong>Your Current Points: {{ driver.points }}</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <ul class="list-group list-group-flush" id="rewards">
   {% for reward in rewards %}
   <li class="list-group-item">
     <div>
-      <h4>{{ reward.reward_title }}</h4>
-        {% for company in companies %}
+      <h4><strong>{{ reward.reward_title }}</strong></h4>
+      <p><strong>Points needed: {{ reward.cost_of_reward | round | int }}</strong></p>
+      {% for company in companies %}
           {% if reward.user_id == company.user_id %}
-            <p>Company: {{company.company_name}}</p>
+          <p><strong>Company: </strong>{{company.company_name}}</p>
           {% endif %}
         {% endfor %}
-      <p>Details: {{ reward.reward_details }}</p>
-      <p>Expiry: {{reward.reward_expiry}}</p>
+      <p><strong>Category: </strong> {{ reward.reward_category }}</p>
+      <p><strong>Details: </strong>{{ reward.reward_details }}</p>
+      <p><strong>Expiry: </strong>{{reward.reward_expiry}}</p>
+      <p><strong>No. of Rewards left: </strong>{{reward.number_of_rewards}}</p>
+
     </div>
   </li>
   {% endfor %}
