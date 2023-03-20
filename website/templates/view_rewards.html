@@ -1,15 +1,19 @@
 {% extends "base.html" %} {% block title %} View Rewards {% endblock %} {% block
 content %}
+
 </br>
 <h3 align="center">View Rewards</h3>
 <ul class="list-group list-group-flush" id="rewards">
   {% for reward in rewards %}
   <li class="list-group-item">
     <div>
-      <h4>{{ reward.reward_title }}</h4>
-      <p>Company: {{ reward.company.company_name}}</p>
-      <p>Details: {{ reward.reward_details }}</p>
-      <p>Expiry: {{reward.reward_expiry}}</p>
+      <h4><strong>{{ reward.reward_title }}</strong></h4>
+      <p><strong>Points needed: {{ reward.cost_of_reward | round | int }}</strong></p>
+      <p><strong>Company: </strong>{{ reward.company.company_name}}</p>
+      <p><strong>Category: </strong> {{ reward.reward_category }}</p>
+      <p><strong>Details: </strong>{{ reward.reward_details }}</p>
+      <p><strong>Expiry: </strong>{{reward.reward_expiry}}</p>
+      <p><strong>No. of Rewards left: </strong>{{reward.number_of_rewards}}</p>
     </div>
   </li>
   {% endfor %}
