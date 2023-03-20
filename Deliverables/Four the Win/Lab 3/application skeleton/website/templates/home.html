@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %} Home {% endblock %}
+
+{% block headcontent %}
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <link
+    href="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css"
+    rel="stylesheet"
+  />
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    #map {
+      width: 100%;
+    }
+    
+    .mapboxgl-popup {
+      max-width: 200px;
+      font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
+    }
+
+    #search-form {
+      margin: 5%;
+    }
+
+    /* for some reason input range extrudes from the sidebar 
+        this is the fix*/
+    input[type="range"] {
+      width: 90%;
+    } 
+
+    #search-form label {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    #search-form input {
+      font-size: 14px;
+      padding: 8px 10px;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+    }
+
+    #search-form button {
+      font-size: 14px;
+      padding: 8px 20px;
+      /* background-color: #007bff; */
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      transition: background-color 0.2s ease-in-out;
+    }
+  /* 
+    #search-form button:hover {
+      background-color: #0069d9;
+    } */
+
+    #custom-sidebar {
+      background-color: #f5f5f5;
+      padding: 20px;
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .radius-wrapper {
+        display: flex;
+        align-items: center;
+      }
+    .radius-wrapper label {
+      margin-right: 10px;
+    }
+  </style>
+{% endblock %}
+
+{% block content%}
+  <div class="container-fluid" style="height: calc(100vh - var(--navbar-min-height));">
+    <div class="row h-100" >  
+      <div class="col-2">
+        <div>
+          <form id="search-form">
+            <div class="form-group">
+              <label for="location-input col-form-label-sm">Location</label>
+              <input type="text" class="form-control form-control-sm" id="location-input">
+            </div>
+            <div class="form-group">
+              <div class="radius-wrapper">
+                <label for="radius-input col-form-label-sm">Radius
+                  <span class="badge badge-info" id="radius-label"><!-- radius --></span>
+                </label>
+                <input type="range" min="1" max="10" step="0.1" id="radius-input">
+              </div>
+            </div>
+            <div class="row justify-content-center">             
+              <button type="submit" class="btn btn-primary">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
+                <span class="disabled-label" style="display: none;">Searching...</span>
+                <span class="enabled-label">Search Carparks</span>
+                
+              </button> 
+            </div>
+          </form>
+        </div>
+        <ul class="list-group list-group-flush" style="max-height: 60vh; overflow-y:auto;" id="nearby-carparks-list">
+        </ul>
+      </div>
+      <div class="col" id="map">
+        <script>
+          var MAPBOX_SECRET_KEY = '{{ MAPBOX_SECRET_KEY }}';
+          var geojsonData = JSON.parse('{{ geojsonData|tojson|safe }}');
+          var interestedCarparkNo = '{{ interested_carpark }}';
+          var hasVehicle = {{ has_vehicle|lower }};
+        </script>
+        <script src="static/map.js"></script>
+      </div>
+    </div>
+  </div>
+{% endblock %}

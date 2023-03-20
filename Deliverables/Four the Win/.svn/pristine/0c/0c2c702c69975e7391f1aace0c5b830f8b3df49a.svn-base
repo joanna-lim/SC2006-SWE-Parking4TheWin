@@ -1,0 +1,38 @@
+{% extends "base.html" %} {% block title %} Driver Login{% endblock %} {% block
+content %}
+<div class="container" width="300px">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <form method="POST">
+        <br />
+        <h3 align="center">Corporate Login</h3>
+        <div class="form-group">
+          <label for="uen">UEN</label>
+          <input
+            type="text"
+            class="form-control"
+            id="uen"
+            name="uen"
+            placeholder="Enter UEN"
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            placeholder="Enter password"
+          />
+        </div>
+        <br />
+        <button type="submit" class="btn btn-primary mb-4">Login</button>
+        <br />
+        <a href="/driver-login">Driver account? Login here. </a>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
