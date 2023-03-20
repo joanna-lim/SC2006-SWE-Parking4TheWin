@@ -68,6 +68,12 @@ def view_rewards():
     rewards = Reward.query.all()
     return render_template("view_rewards.html", user=current_user, rewards=rewards)
 
+@views.route('/claim-points', methods=['GET', 'POST'])
+@role_required('driver')
+def claim_points():
+    user = User.query.all()
+    return render_template("claim_points.html", user=current_user)
+
 # corporate views here
 @views.route('/rewards-creation', methods=['GET', 'POST'])
 @role_required('corporate')
@@ -91,11 +97,11 @@ def rewards_creation():
         flash('Reward created!', category='success')
     return render_template("rewards_creation.html", user=current_user)
 
-@views.route('/claim-points', methods=['GET', 'POST'])
-@role_required('driver')
-def claim_points():
-    user = User.query.all()
-    return render_template("claim_points.html", user=current_user)
+@views.route('/posted-rewards', methods=['GET', 'POST'])
+@role_required('corporate')
+def posted_rewards():
+    rewards = Reward.query.all()
+    return render_template("posted_rewards.html", user=current_user, rewards=rewards)
 
 # database related routes
 @views.route('/update-interested-carpark', methods=['POST'])
