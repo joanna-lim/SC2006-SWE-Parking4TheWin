@@ -71,15 +71,12 @@ def view_rewards():
     driver = Driver.query.filter_by(user_id=current_user.id).first()
     return render_template("view_rewards.html", user=current_user, rewards=rewards, companies=companies, driver=driver)
 
-<<<<<<< HEAD
-=======
 @views.route('/claim-points', methods=['GET', 'POST'])
 @role_required('driver')
 def claim_points():
     driver = Driver.query.filter_by(user_id=current_user.id).first()
     return render_template("claim_points.html", user=current_user, driver = driver)
 
->>>>>>> b5814adcd46b8b1a6ee4d22b4ac205734da8de25
 # corporate views here
 @views.route('/rewards-creation', methods=['GET', 'POST'])
 @role_required('corporate')
