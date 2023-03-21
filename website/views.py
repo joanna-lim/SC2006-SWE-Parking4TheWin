@@ -113,7 +113,7 @@ def update_interested_carpark():
     data = json.loads(request.data)
     carpark_address = data['carpark_address']
     carpark = CarPark.query.filter_by(address=carpark_address).first()
-    user = Driver.query.filter_by(id = current_user.id).first()
+    user = Driver.query.filter_by(user_id = current_user.id).first()
 
     # user is removing interest from an old carpark
     # op_type = 0 means user is removing interest
