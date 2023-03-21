@@ -71,6 +71,12 @@ def view_rewards():
     driver = Driver.query.filter_by(id=current_user.id).first()
     return render_template("view_rewards.html", user=current_user, rewards=rewards, companies=companies, driver=driver)
 
+@views.route('/claim-points', methods=['GET', 'POST'])
+@role_required('driver')
+def claim_points():
+    driver = Driver.query.filter_by(id=current_user.id).first()
+    return render_template("claim_points.html", user=current_user, driver = driver)
+
 # corporate views here
 @views.route('/rewards-creation', methods=['GET', 'POST'])
 @role_required('corporate')
@@ -100,12 +106,6 @@ def posted_rewards():
     rewards = Reward.query.all()
     companies = Company.query.all()
     return render_template("posted_rewards.html", user=current_user, rewards=rewards, companies=companies)
-
-@views.route('/claim-points', methods=['GET', 'POST'])
-@role_required('driver')
-def claim_points():
-    driver = Driver.query.filter_by(id=current_user.id).first()
-    return render_template("claim_points.html", user=current_user, driver = driver)
 
 # database related routes
 @views.route('/update-interested-carpark', methods=['POST'])
