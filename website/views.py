@@ -100,20 +100,12 @@ def rewards_creation():
         flash('Reward created!', category='success')
     return render_template("rewards_creation.html", user=current_user)
 
-<<<<<<< HEAD
-@views.route('/claim-points', methods=['GET', 'POST'])
-@role_required('driver')
-def claim_points():
-    user = User.query.all()
-    return render_template("claim_points.html", user=current_user)
-=======
 @views.route('/posted-rewards', methods=['GET', 'POST'])
 @role_required('corporate')
 def posted_rewards():
     rewards = Reward.query.all()
     companies = Company.query.all()
     return render_template("posted_rewards.html", user=current_user, rewards=rewards, companies=companies)
->>>>>>> b5814adcd46b8b1a6ee4d22b4ac205734da8de25
 
 # database related routes
 @views.route('/update-interested-carpark', methods=['POST'])
@@ -185,11 +177,11 @@ def deduct_points():
 @views.route('verify-parking', methods=['GET', 'POST'])
 @role_required('driver')
 def verify_parking():
-    user = User.query.filter_by(id = current_user.id).first()
+    driver = Driver.query.filter_by(id = current_user.id).first()
 
     # Users should not be able to use this route if they don't have any
     # interested carparks
-    if user.interested_carpark is None:
+    if driver.interested_carpark is None:
         flash("You don't have any interested carpark.")
         return redirect(url_for("views.real_home"))
 
@@ -200,7 +192,7 @@ def verify_parking():
         # Do verification of parking image here
         # The prototype won't implement this.
 
-        user.interested_carpark = None
+        driver.interested_carpark = None
         #
         # Add points related code here. And any other stuff.
         #
