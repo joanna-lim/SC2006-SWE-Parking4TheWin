@@ -68,12 +68,6 @@ def view_rewards():
     rewards = Reward.query.all()
     return render_template("view_rewards.html", user=current_user, rewards=rewards)
 
-@views.route('/claim-points', methods=['GET', 'POST'])
-@role_required('driver')
-def claim_points():
-    user = User.query.all()
-    return render_template("claim_points.html", user=current_user)
-
 # corporate views here
 @views.route('/rewards-creation', methods=['GET', 'POST'])
 @role_required('corporate')
@@ -97,11 +91,11 @@ def rewards_creation():
         flash('Reward created!', category='success')
     return render_template("rewards_creation.html", user=current_user)
 
-@views.route('/posted-rewards', methods=['GET', 'POST'])
-@role_required('corporate')
-def posted_rewards():
-    rewards = Reward.query.all()
-    return render_template("posted_rewards.html", user=current_user, rewards=rewards)
+@views.route('/claim-points', methods=['GET', 'POST'])
+@role_required('driver')
+def claim_points():
+    user = User.query.all()
+    return render_template("claim_points.html", user=current_user)
 
 # database related routes
 @views.route('/update-interested-carpark', methods=['POST'])
@@ -169,3 +163,28 @@ def deduct_points():
     user.points-=10
     db.session.commit()
     return
+
+@views.route('verify-parking', methods=['GET', 'POST'])
+@role_required('driver')
+def verify_parking():
+    user = User.query.filter_by(id = current_user.id).first()
+
+    # Users should not be able to use this route if they don't have any
+    # interested carparks
+    if user.interested_carpark is None:
+        flash("You don't have any interested carpark.")
+        return redirect(url_for("views.real_home"))
+
+    if request.method == "GET":
+        return render_template("verify_parking.html", user=current_user)
+    elif request.method == "POST":
+        #
+        # Do verification of parking image here
+        # The prototype won't implement this.
+
+        user.interested_carpark = None
+        #
+        # Add points related code here. And any other stuff.
+        #
+        db.session.commit()
+        return redirect(url_for("views.real_home"))

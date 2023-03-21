@@ -92,7 +92,7 @@
             <div class="form-group">
               <div class="radius-wrapper">
                 <label for="radius-input col-form-label-sm">Radius
-                  <span class="badge badge-info" id="radius-label"><!-- radius --></span>
+                  <span class="badge badge-info" id="radius-label"><!-- radius label --></span>
                 </label>
                 <input type="range" min="1" max="10" step="0.1" id="radius-input">
               </div>
@@ -102,13 +102,18 @@
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
                 <span class="disabled-label" style="display: none;">Searching...</span>
                 <span class="enabled-label">Search Carparks</span>
-                
               </button> 
             </div>
           </form>
         </div>
-        <ul class="list-group list-group-flush" style="max-height: 60vh; overflow-y:auto;" id="nearby-carparks-list">
-        </ul>
+        <div>
+          <ul class="list-group list-group-flush" style="height: 55vh; overflow-y:auto;" id="nearby-carparks-list">
+            <!-- To be filled with Interested Carpark and nearby carparks -->
+          </ul>
+        </div>
+        <div class="row justify-content-center m-1" style="max-height: 5vh;">
+          <a href="/verify-parking" class="btn btn-primary" style="display: block;">I have parked</a>
+        </div>
       </div>
       <div class="col" id="map">
         <script>

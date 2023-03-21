@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% block title %} Verify parking {% endblock %} {% block
+    content %}
+<h3 align="center">Verify Parking</h3>
+
+<div class="container d-flex flex-column align-items-center">
+    <form method="POST">
+      <div class="form-group">
+        <label for="imageUpload">Upload Picture</label>
+        <div class="custom-file">
+          <input type="file" accept="image/png, image/jpeg" class="custom-file-input" id="imageUpload" name="image">
+          <label class="custom-file-label" for="imageUpload">Choose file</label>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        Submit
+      </button>
+    </form>
+    <i>I can't get image upload working. But this is good enough as it is.</i>
+</div>
+
+{% endblock %} 
