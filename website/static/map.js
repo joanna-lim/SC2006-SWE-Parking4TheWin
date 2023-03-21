@@ -3,11 +3,9 @@
   ----
   Consts
   Variables
-
   Helper Functions
     General
     UI Related
-
   Actual code execution
     Mapbox
     UI Elements
@@ -402,7 +400,6 @@ map.on("click", "carparks-layer", (e) => {
                 </div>
               </div>
               <br>
-
               <div class="row">
               <div class="col-12">
                 <strong>Carpark Type</strong>
@@ -428,7 +425,6 @@ map.on("click", "carparks-layer", (e) => {
               </div>
             </div>
             <br>
-
             <div class="row">
               <div class="col-8">
                 <strong>Lots Available</strong>

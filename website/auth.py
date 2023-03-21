@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from .models import User
+from .models import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
@@ -29,10 +29,11 @@ def driver_login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        driver = User.query.filter_by(email=email).first()
+        driver = Driver.query.filter_by(email=email).first()
 
         if driver:
             if check_password_hash(driver.password, password):
+                driver = User.query.filter_by(id=driver.user_id).first()
                 login_user(driver, remember=True)
                 return redirect(url_for('views.home'))
             else:
@@ -47,10 +48,11 @@ def corporate_login():
         uen = request.form.get('uen')
         password = request.form.get('password')
 
-        company = User.query.filter_by(uen=uen).first()
+        company = Company.query.filter_by(uen=uen).first()
 
         if company:
             if check_password_hash(company.password, password):
+                company = User.query.filter_by(id=company.user_id).first()
                 login_user(company, remember=True)
                 return redirect(url_for('views.home'))
             else:
@@ -73,7 +75,7 @@ def driver_sign_up():
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
 
-        driver = User.query.filter_by(email=email).first()
+        driver = Driver.query.filter_by(email=email).first()
 
         """
         account creation restrictions:
@@ -92,10 +94,13 @@ def driver_sign_up():
             
         else:
             # add user to database
-            new_driver = User(email=email, first_name=first_name, password=generate_password_hash(password1,method='sha256'), user_type="driver", points=0)
+            new_driver = User(user_type="driver")
             db.session.add(new_driver)
             db.session.commit()
             login_user(new_driver,remember=True)
+            new_driver = Driver(email=email, first_name=first_name, password=generate_password_hash(password1,method='sha256'),user_id=current_user.id, points=0)
+            db.session.add(new_driver)
+            db.session.commit()
             return redirect(url_for('views.home'))
     return render_template("driver_sign_up.html", user=current_user)
         
@@ -107,7 +112,7 @@ def corporate_sign_up():
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
 
-        company = User.query.filter_by(uen=uen).first()
+        company = Company.query.filter_by(uen=uen).first()
 
         """
         account creation restrictions:
@@ -126,10 +131,14 @@ def corporate_sign_up():
             
         else:
             # add user to database
-            new_company = User(uen=uen, company_name = company_name, password=generate_password_hash(password1,method='sha256'), user_type="corporate")
+            new_company = User(user_type="corporate")
             db.session.add(new_company)
             db.session.commit()
             login_user(new_company,remember=True)
+            new_company = Company(uen=uen, company_name = company_name, password=generate_password_hash(password1,method='sha256'), user_id=current_user.id)
+            db.session.add(new_company)
+            db.session.commit()
+            
             flash('Account created! :)', category='success')
             return redirect(url_for('views.home'))
         

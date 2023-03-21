@@ -24,8 +24,9 @@ def real_home():
     vehicles = Vehicle.query.filter_by(user_id = current_user.id).all()
     if vehicles:
         has_vehicle = True
-    interested_carpark = current_user.interested_carpark
-    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle, interested_carpark=interested_carpark)
+    driver = Driver.query.filter_by(user_id = current_user.id).first()
+    interested_carpark = driver.interested_carpark
+    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle, interested_carpark=interested_carpark, driver=driver)
 
 @views.route('/', methods=['GET', 'POST'])
 @role_required('driver')
@@ -66,8 +67,19 @@ def registered_vehicles():
 @role_required('driver')
 def view_rewards():
     rewards = Reward.query.all()
-    return render_template("view_rewards.html", user=current_user, rewards=rewards)
+    companies = Company.query.all()
+    driver = Driver.query.filter_by(user_id=current_user.id).first()
+    return render_template("view_rewards.html", user=current_user, rewards=rewards, companies=companies, driver=driver)
 
+<<<<<<< HEAD
+=======
+@views.route('/claim-points', methods=['GET', 'POST'])
+@role_required('driver')
+def claim_points():
+    driver = Driver.query.filter_by(user_id=current_user.id).first()
+    return render_template("claim_points.html", user=current_user, driver = driver)
+
+>>>>>>> b5814adcd46b8b1a6ee4d22b4ac205734da8de25
 # corporate views here
 @views.route('/rewards-creation', methods=['GET', 'POST'])
 @role_required('corporate')
@@ -91,11 +103,20 @@ def rewards_creation():
         flash('Reward created!', category='success')
     return render_template("rewards_creation.html", user=current_user)
 
+<<<<<<< HEAD
 @views.route('/claim-points', methods=['GET', 'POST'])
 @role_required('driver')
 def claim_points():
     user = User.query.all()
     return render_template("claim_points.html", user=current_user)
+=======
+@views.route('/posted-rewards', methods=['GET', 'POST'])
+@role_required('corporate')
+def posted_rewards():
+    rewards = Reward.query.all()
+    companies = Company.query.all()
+    return render_template("posted_rewards.html", user=current_user, rewards=rewards, companies=companies)
+>>>>>>> b5814adcd46b8b1a6ee4d22b4ac205734da8de25
 
 # database related routes
 @views.route('/update-interested-carpark', methods=['POST'])
@@ -103,7 +124,7 @@ def update_interested_carpark():
     data = json.loads(request.data)
     carpark_address = data['carpark_address']
     carpark = CarPark.query.filter_by(address=carpark_address).first()
-    user = User.query.filter_by(id = current_user.id).first()
+    user = Driver.query.filter_by(user_id = current_user.id).first()
 
     # user is removing interest from an old carpark
     # op_type = 0 means user is removing interest
@@ -152,15 +173,15 @@ def delete_reward():
 
 @views.route('/add-points', methods=['POST'])
 def add_points():
-    user = User.query.filter_by(id = current_user.id).first()
-    user.points+=10
+    driver = Driver.query.filter_by(user_id = current_user.id).first()
+    driver.points+=10
     db.session.commit()
     return
 
 @views.route('/deduct-points', methods=['POST'])
 def deduct_points():
-    user = User.query.filter_by(id = current_user.id).first()
-    user.points-=10
+    driver = Driver.query.filter_by(user_id = current_user.id).first()
+    driver.points-=10
     db.session.commit()
     return
 
