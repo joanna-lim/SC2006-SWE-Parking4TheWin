@@ -68,13 +68,13 @@ def registered_vehicles():
 def view_rewards():
     rewards = Reward.query.all()
     companies = Company.query.all()
-    driver = Driver.query.filter_by(id=current_user.id).first()
+    driver = Driver.query.filter_by(user_id=current_user.id).first()
     return render_template("view_rewards.html", user=current_user, rewards=rewards, companies=companies, driver=driver)
 
 @views.route('/claim-points', methods=['GET', 'POST'])
 @role_required('driver')
 def claim_points():
-    driver = Driver.query.filter_by(id=current_user.id).first()
+    driver = Driver.query.filter_by(user_id=current_user.id).first()
     return render_template("claim_points.html", user=current_user, driver = driver)
 
 # corporate views here
@@ -162,14 +162,14 @@ def delete_reward():
 
 @views.route('/add-points', methods=['POST'])
 def add_points():
-    driver = Driver.query.filter_by(id = current_user.id).first()
+    driver = Driver.query.filter_by(user_id = current_user.id).first()
     driver.points+=10
     db.session.commit()
     return
 
 @views.route('/deduct-points', methods=['POST'])
 def deduct_points():
-    driver = Driver.query.filter_by(id = current_user.id).first()
+    driver = Driver.query.filter_by(user_id = current_user.id).first()
     driver.points-=10
     db.session.commit()
     return
