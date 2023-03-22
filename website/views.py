@@ -177,7 +177,7 @@ def deduct_points():
 @views.route('verify-parking', methods=['GET', 'POST'])
 @role_required('driver')
 def verify_parking():
-    driver = Driver.query.filter_by(id = current_user.id).first()
+    driver = Driver.query.filter_by(user_id = current_user.id).first()
 
     # Users should not be able to use this route if they don't have any
     # interested carparks
