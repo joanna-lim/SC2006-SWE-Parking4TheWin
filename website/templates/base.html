@@ -42,15 +42,15 @@
         <div class="navbar-nav">
           {% if user.is_authenticated and user.user_type=="driver"%}
           <a class="nav-item nav-link" id="carparks" href="/">carparks</a>
-          <a class="nav-item nav-link" id="COEregistration" href="/coe-registration">COE registration</a>
-          <a class="nav-item nav-link" id="viewRewards" href="/view-rewards">view rewards</a>
-          <a class="nav-item nav-link" id="claimPoints" href="/claim-points">claim points</a>
+          <a class="nav-item nav-link" id="COEregistration" href="/coe">COE registration</a>
+          <a class="nav-item nav-link" id="viewRewards" href="/rewards">view rewards</a>
+          <a class="nav-item nav-link" id="claimPoints" href="/points">claim points</a>
           {% elif user.is_authenticated and user.user_type=="corporate"%}
-          <a class="nav-item nav-link" id="rewardsCreation" href="/rewards-creation">rewards creation</a>
-          <a class="nav-item nav-link" id="postedRewards" href="/posted-rewards">view rewards</a>
+          <a class="nav-item nav-link" id="rewardsCreation" href="/rewards/creation">rewards creation</a>
+          <a class="nav-item nav-link" id="postedRewards" href="/rewards">view rewards</a>
           {%else%}
-          <a class="nav-item nav-link" id="driverLogin" href="/driver-login">login</a>
-          <a class="nav-item nav-link" id="driverSignUp" href="/driver-sign-up">sign up</a>
+          <a class="nav-item nav-link" id="driverLogin" href="/login/driver">login</a>
+          <a class="nav-item nav-link" id="driverSignUp" href="/signup/driver">sign up</a>
           {% endif %}
         </div>
         {% if user.is_authenticated %}

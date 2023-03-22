@@ -3,19 +3,33 @@
 <h3 align="center">Verify Parking</h3>
 
 <div class="container d-flex flex-column align-items-center">
-    <form method="POST">
+    <form id="validation-form">
       <div class="form-group">
-        <label for="imageUpload">Upload Picture</label>
+        <label for="imageUpload">Upload picture of your parked car for verification</label>
         <div class="custom-file">
           <input type="file" accept="image/png, image/jpeg" class="custom-file-input" id="imageUpload" name="image">
           <label class="custom-file-label" for="imageUpload">Choose file</label>
         </div>
       </div>
-      <button type="submit" class="btn btn-primary">
+      <button class="btn btn-primary"">
         Submit
       </button>
     </form>
     <i>I can't get image upload working. But this is good enough as it is.</i>
 </div>
+
+<script>
+
+validForm = document.getElementById("validation-form");
+
+validForm.addEventListener("submit", async function(event) {
+  event.preventDefault();
+  await fetch('/drivers', {
+          method: 'PUT',
+          body: JSON.stringify({ intent : "delete_interested_carpark"})
+  });
+  window.location.href = "/map";
+});
+</script>
 
 {% endblock %} 

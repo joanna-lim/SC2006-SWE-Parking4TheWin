@@ -3,8 +3,8 @@
 <div class="container">
     <h1>welcome to points system</h1>
 
-    <button type="button" class="btn btn-danger" onClick="deductPoints()">-</button>
-    <button type="button" class="btn btn-success" onClick="addPoints()">+</button> 
+    <button type="button" class="btn btn-danger" onClick="changePoints(-10)">-</button>
+    <button type="button" class="btn btn-success" onClick="changePoints(10)">+</button> 
     <h2>Your current points:{{ driver.points }}</a></h2>
 </div>
 {% endblock %}

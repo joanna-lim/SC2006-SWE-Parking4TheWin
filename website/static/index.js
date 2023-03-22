@@ -1,36 +1,30 @@
 function deleteReward(rewardId) {
     if (confirm("Are you sure you want to delete this reward?")) {
-    fetch('/delete-reward', {
-        method:'POST',
+    fetch('/rewards', {
+        method:'DELETE',
         body: JSON.stringify({ rewardId: rewardId })
     }).then((_res)=>{
-        window.location.href="/posted-rewards";
+        window.location.href="/rewards";
     });
 }
 }
 
 function deleteVehicle(vehicleId) {
     if (confirm("Are you sure you want to delete this vehicle?")) {
-        fetch('/delete-vehicle', {
-            method: 'POST',
+        fetch('/vehicles', {
+            method: 'DELETE',
             body: JSON.stringify({ vehicleId: vehicleId })
         }).then((_res) => {
-            window.location.href = "/registered-vehicles";
+            window.location.href = "/coe/registered_vehicles";
         });
     }
 }
 
-function addPoints(){
-    fetch('/add-points', {
-        method: 'POST',
+function changePoints(points_change){
+    fetch('/points', {
+        method: 'PUT',
+        body: JSON.stringify({points_change : points_change})
     }).then((_res) => {
-        window.location.href = "/claim-points";
-    });
-}
-function deductPoints(){
-    fetch('/deduct-points', {
-        method: 'POST',
-    }).then((_res) => {
-        window.location.href = "/claim-points";
+        window.location.href = "/points";
     });
 }

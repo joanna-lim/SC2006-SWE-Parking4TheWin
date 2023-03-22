@@ -99,12 +99,12 @@ async function findNearbyCarparks(coordinates, radiusInKm) {
 // and then the popup info
 async function addCarpark(address, carParkNo) {
   try {
-    const response = await fetch('/update-interested-carpark', {
-      method: 'POST',
+    const response = await fetch('/drivers', {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ carpark_address: address })
+      body: JSON.stringify({ intent: "update_interested_carpark", carpark_address: address })
     });
     const data = await response.json();
 
