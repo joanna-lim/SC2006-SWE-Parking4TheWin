@@ -25,11 +25,18 @@ var radiusInput = document.getElementById("radius-input");
 var searchMarker = null;    // there can only be one search marker at a time
 var storedInterestedCarpark = null; // this is different from window.interestedCarparkNo
 var storedNearbyCarparks = null;
+var geojsonData = null;
 
-function findCarparkFromNo(carparkNo) {
+// Jinja passes interested carpark as "None" instead of null
+// Ensure that it is null
+interestedCarparkNo = interestedCarparkNo === "None" ? null : interestedCarparkNo;
+
+async function findCarparkFromNo(carparkNo) {
   if (!carparkNo) {
     return null;
   }
+
+  await waitTillTargetReady(() => geojsonData, 100);
 
   for (let carpark of geojsonData.features) {
     if(carpark.properties.car_park_no === carparkNo) {
@@ -55,11 +62,15 @@ function isCarparksReady() {
   return map && map.getSource('carparks-data') && map.getLayer('carparks-layer');
 }
 
-// Wait untill "carparks-data" and "carparks-layer" are ready
-async function waitTillCarparksReady() {
-    while (!isCarparksReady()) {
+function isMapLoaded() {
+  return map && map.loaded();
+}
+
+// wait untill some target is ready
+async function waitTillTargetReady(isTargetReady, milliseconds) {
+    while (!isTargetReady()) {
       // wait 1 second before retrying
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, milliseconds));
     }
 }
 
@@ -69,7 +80,7 @@ async function findNearbyCarparks(coordinates, radiusInKm) {
   const circle = turf.circle(coordinates, radiusInKm, options);
   var carparks = null;
 
-  await waitTillCarparksReady();
+  await waitTillTargetReady(isCarparksReady, 100);
 
   // Return carparks in the Turf.js circle object
   carparks = map.querySourceFeatures('carparks-data', {
@@ -97,7 +108,7 @@ async function findNearbyCarparks(coordinates, radiusInKm) {
 
 // Update database with the user's interested carpark
 // and then the popup info
-async function addCarpark(address, carParkNo) {
+async function updateInterestedCarpark(address, carParkNo) {
   try {
     const response = await fetch('/drivers', {
       method: 'PUT',
@@ -121,7 +132,7 @@ async function addCarpark(address, carParkNo) {
         var i = Number($("#mapboxgl-popup-content-interested").text());
         i++;
         $("#mapboxgl-popup-content-interested").text(i);
-        updateNearbyCarparksList(null, findCarparkFromNo(window.interestedCarparkNo));
+        updateNearbyCarparksList(null, await findCarparkFromNo(window.interestedCarparkNo));
       } else { // User Clicked on "I'm no longer interested" button.
         window.interestedCarparkNo = null;
         storedInterestedCarpark = null;
@@ -165,6 +176,47 @@ async function search() {
   } catch (error) {
     return console.error(error);
   }
+}
+
+// fetch GeoJSONData from "/carparks" url
+async function fetchGeoJSONData() {
+  const response = await fetch("/carparks", {
+    method : "GET"
+  });
+  geojsonData = await response.json();
+}
+
+// fetch GeoJSON and load it to the map as a layer if ready
+async function loadGeoJSONData() {
+  await fetchGeoJSONData();
+  await waitTillTargetReady(isMapLoaded, 100);
+
+  map.addSource("carparks-data", {
+    type: "geojson",
+    data: window.geojsonData,
+  });
+
+  // Add a layer containing pins using "carparks-data" source
+  map.addLayer({
+    id: "carparks-layer",
+    type: "circle",
+    source: "carparks-data",
+    paint: {
+      "circle-radius": 12,
+      "circle-color": [
+        "interpolate",
+        ["linear"],
+        ["get", "vacancy_percentage"],
+        0,
+        "red",
+        50,
+        "yellow",
+        100,
+        "green",
+      ],
+      "circle-opacity": 0.6,
+    },
+  });
 }
 
 function createCarparksListItem(carpark, interested) {
@@ -295,6 +347,19 @@ function centerMap(coordinates = null, radius = null) {
   map.fitBounds(bounds);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+////////////////                                      ////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+
+async function initialSetup() {
+  loadGeoJSONData();
+  carpark = await findCarparkFromNo(window.interestedCarparkNo);
+  updateNearbyCarparksList(null, carpark);
+}
+
+initialSetup();
+
 
 // The radius input also controls the map zoom level
 radiusInput.addEventListener("input", function () {
@@ -329,40 +394,6 @@ searchForm.addEventListener("submit", async function(event) {
 // Set initial value of radius label (without jquery)
 document.getElementById("radius-label").textContent = radiusInput.value + "km";
 
-map.on("load", () => {
-  map.addSource("carparks-data", {
-    type: "geojson",
-    data: window.geojsonData,
-  });
-
-  // Add a layer containing pins using "carparks-data" source
-  map.addLayer({
-    id: "carparks-layer",
-    type: "circle",
-    source: "carparks-data",
-    paint: {
-      "circle-radius": 12,
-      "circle-color": [
-        "interpolate",
-        ["linear"],
-        ["get", "vacancy_percentage"],
-        0,
-        "red",
-        50,
-        "yellow",
-        100,
-        "green",
-      ],
-      "circle-opacity": 0.6,
-    },
-  });
-
-  // Format interestedCarpark, Jinja passes it as "None" instead of null or None
-  if (window.interestedCarparkNo === "None") {
-    window.interestedCarparkNo = null;    
-  }
-  updateNearbyCarparksList(null, findCarparkFromNo(window.interestedCarparkNo));
-});
 
 // Display popup containing carpark information when clicking on a pin
 map.on("click", "carparks-layer", (e) => {
@@ -454,7 +485,7 @@ map.on("click", "carparks-layer", (e) => {
 
   if (window.hasVehicle) {
     let buttonHTML = `<button type="button"
-                               onClick="addCarpark('${address}','${carParkNo}')"
+                               onClick="updateInterestedCarpark('${address}','${carParkNo}')"
                                class="btn btn-primary btn-sm"
                                id="mapboxgl-popup-content-button">
                                ${interestedButtonText}

@@ -50,7 +50,7 @@ def format_carpark_information(record):
 # HDB carpark information mainly consists of information that changes rarely
 # We will only need to update everytime the webapp is started
 def update_carparks():
-    print("XXXXX Updating carparks XXXXX")
+    print("XXXXX Updating carparks XXXXXXXXXXXXXXXXXX")
     from . import db
     from .models import CarPark
     import csv
@@ -99,7 +99,7 @@ def generate_geojson():
     from . import db
     from .models import CarPark
     import os
-    print("XXXXX Generating GeoJSON XXXXX")
+    print("XXXXX Generating GeoJSON XXXXXXXXXXXXXXXXX")
     carparks = CarPark.query.all()
     features = []
     for carpark in carparks:

@@ -3,10 +3,19 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from flask_login import LoginManager
 from .update_carparks import update_carparks, update_carparks_availability, generate_geojson
-
+from time import sleep
+from threading import Thread, active_count
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
+
+def do_with_app_context_periodically(app, interval, target, args=None, kwargs=None):
+    args = args or []
+    kwargs = kwargs or {}
+    while True:
+        with app.app_context():
+            target(*args, **kwargs)
+        sleep(interval)
 
 def create_app():
     app = Flask(__name__)
@@ -24,9 +33,19 @@ def create_app():
 
     with app.app_context():
         db.create_all()
-        update_carparks()
+
+    def f():
         update_carparks_availability()
         generate_geojson()
+
+    t1 = Thread(target=do_with_app_context_periodically, args=(app, 60*60*24, update_carparks))
+    t1.daemon = True
+    t2 = Thread(target=do_with_app_context_periodically, args=(app, 60*5, f))
+    t2.daemon = True
+
+    # Comment this out if you want
+    t1.start()
+    t2.start()
     
     login_manager = LoginManager()
     login_manager.login_view = 'auth.get_driver_login'

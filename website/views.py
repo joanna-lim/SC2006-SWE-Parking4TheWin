@@ -20,22 +20,17 @@ def home():
 @views.route('/map', methods=['GET'])
 @role_required('driver')
 def get_map():
-    update_carparks_availability()
-    generate_geojson()
-    with open('website/carparks.json') as f:
-        data = json.loads(f.read())
     has_vehicle = False
     vehicles = Vehicle.query.filter_by(user_id = current_user.id).all()
     if vehicles:
         has_vehicle = True
     driver = Driver.query.filter_by(user_id = current_user.id).first()
     interested_carpark = driver.interested_carpark
-    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, geojsonData = data, has_vehicle=has_vehicle, interested_carpark=interested_carpark, driver=driver)
+    return render_template("home.html", user=current_user, MAPBOX_SECRET_KEY=MAPBOX_SECRET_KEY, has_vehicle=has_vehicle, interested_carpark=interested_carpark, driver=driver)
 
 #############################
 ##### Driver views here #####
 #############################
-
 @views.route('/coe', methods=['GET'])
 @role_required('driver')
 def get_coe():
@@ -195,7 +190,7 @@ def put_drivers():
         db.session.commit()
         return redirect(url_for("views.get_map"))
 
-@views.route('parking_verification', methods=['GET'])
+@views.route('/parking_verification', methods=['GET'])
 @role_required('driver')
 def get_parking_verification():
     # Users should not be able to use this route if they don't have any
@@ -207,3 +202,11 @@ def get_parking_verification():
 
     if request.method == "GET":
         return render_template("verify_parking.html", user=current_user)
+
+# Returns geojson data
+@views.route("/carparks", methods=["GET"])
+@role_required("driver")
+def get_carparks():
+    with open('website/carparks.json') as f:
+        data = json.loads(f.read())
+    return jsonify(data)
