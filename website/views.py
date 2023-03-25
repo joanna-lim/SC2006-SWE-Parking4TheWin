@@ -94,7 +94,7 @@ def delete_rewards():
     return jsonify({})
 
 @views.route('/rewards/claim', methods=['POST'])
-#@role_required('driver')
+@role_required('driver')
 def claim_reward():
     reward_id = request.form['reward_id']
     reward = Reward.query.get(reward_id)
@@ -102,7 +102,9 @@ def claim_reward():
     
     if driver.points >= reward.cost_of_reward and reward.number_of_rewards > 0:
         driver.points -= reward.cost_of_reward
+        new_claim = UserClaimedRewards(user_id=current_user.id, reward_id=reward_id)
         db.session.add(driver)
+        db.session.add(new_claim)
         db.session.commit()
 
         reward.number_of_rewards -= 1

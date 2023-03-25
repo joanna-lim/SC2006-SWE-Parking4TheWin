@@ -8,6 +8,7 @@ class User(db.Model, UserMixin):
     # for drivers
     drivers = db.relationship("Driver")
     vehicles = db.relationship('Vehicle')
+    user_claimed_rewards = db.relationship('UserClaimedRewards')
     # for companies
     companys = db.relationship("Company")
     
@@ -45,6 +46,7 @@ class Reward(db.Model):
     cost_of_reward = db.Column(db.Float)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # this user_id is the company that created the reward (NOT CLAIMANTS)
     company = db.relationship('User', backref='company')
+    user_claimed_rewards = db.relationship('UserClaimedRewards')
 
 class CarPark(db.Model):
     __tablename__ = 'carpark'
@@ -69,3 +71,8 @@ class CarPark(db.Model):
     # jona's additions 
     interested_drivers = db.relationship('Driver', backref='interested_carpark_obj')
     no_of_interested_drivers = db.Column(db.Integer)
+
+class UserClaimedRewards(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # this user IS the claimant - not the company.
+    reward_id = db.Column(db.Integer, db.ForeignKey('reward.id'))
