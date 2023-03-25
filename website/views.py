@@ -93,6 +93,28 @@ def delete_rewards():
             db.session.commit()
     return jsonify({})
 
+@views.route('/rewards/claim', methods=['POST'])
+#@role_required('driver')
+def claim_reward():
+    reward_id = request.form['reward_id']
+    reward = Reward.query.get(reward_id)
+    driver = Driver.query.filter_by(user_id=current_user.id).first()
+    
+    if driver.points >= reward.cost_of_reward and reward.number_of_rewards > 0:
+        driver.points -= reward.cost_of_reward
+        db.session.add(driver)
+        db.session.commit()
+
+        reward.number_of_rewards -= 1
+        db.session.add(reward)
+        db.session.commit()
+
+        flash(f"Congratulations! You have claimed the reward '{reward.reward_title}'. Your new points balance is {driver.points}.", "success")
+    else:
+        flash(f"Sorry, you do not have enough points to claim this reward or this reward is no longer available.", "danger")
+    
+    return redirect(url_for('views.get_rewards'))
+
 ################################
 ##### corporate views here #####
 ################################
