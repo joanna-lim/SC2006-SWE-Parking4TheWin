@@ -15,7 +15,7 @@ views = Blueprint('views', __name__)
 @views.route('/', methods=['GET'])
 @role_required('driver')
 def home():
-    return render_template("rhome.html", map_path=request.base_url+"map")
+    return redirect(url_for('views.get_map'))
 
 @views.route('/map', methods=['GET'])
 @role_required('driver')
