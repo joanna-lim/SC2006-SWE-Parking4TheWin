@@ -3,24 +3,32 @@
   
   <br />
   <h3 align="center">Posted Rewards</h3>
-  <ul class="list-group list-group-flush" id="rewards">
-    {% for reward in rewards %} {% if reward.company == user %}
-    <li class="list-group-item">
-      <button type="button" class="close" onClick="deleteReward('{{ reward.id }}')">
-        <span aria-hidden="true">&times;</span>
-      </button>
-      <div>
-        <h4>{{ reward.reward_title }}</h4>
-        {% for company in companies %}
-          {% if reward.user_id == company.user_id %}
-            <p>Company: {{company.company_name}}</p>
-          {% endif %}
+  
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        {% for reward in rewards %}
+        
+        <div class="card mb-4">
+          <div class="card-body">
+            <button type="button" class="close" onClick="deleteReward('{{ reward.id }}')">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="card-title">{{ reward.reward_title }}</h4>
+            {% for company in companies %}
+              {% if reward.user_id == company.user_id %}
+              <p class="card-text"><strong>Company: </strong>{{company.company_name}}</p>
+              {% endif %}
+            {% endfor %}
+            <p class="card-text"><strong>Category: </strong> {{ reward.reward_category }}</p>
+            <p class="card-text"><strong>Details: </strong>{{ reward.reward_details }}</p>
+            <p class="card-text"><strong>Expiry: </strong>{{ reward.reward_expiry}}</p>
+            <p class="card-text"><strong>No. of Rewards left </strong>{{ reward.number_of_rewards}}</p>
+          </div>
+        </div>
         {% endfor %}
-        <p>Category: {{ reward.reward_category }}</p>
-        <p>Details: {{ reward.reward_details }}</p>
-        <p>Expiry: {{reward.reward_expiry}}</p>
-        <p>No. of Rewards left: {{reward.number_of_rewards}}</p>
       </div>
-    </li>
-    {% endif %} {% endfor %} {% endblock %}
-  </ul>
+    </div>
+  </div>
+
+  {% endblock %}
