@@ -231,9 +231,8 @@ def put_drivers():
         # The prototype won't implement this.
 
         driver.interested_carpark = None
-        #
-        # Add points related code here. And any other stuff.
-        #
+        driver.points += 10
+        flash("Thanks for uploading, you've received 10 points!")
         db.session.commit()
         return redirect(url_for("views.get_map"))
 
@@ -244,7 +243,7 @@ def get_parking_verification():
     # interested carparks
     driver = Driver.query.filter_by(user_id = current_user.id).first()
     if driver.interested_carpark is None:
-        flash("You don't have any interested carpark.")
+        flash("You don't have any interested carpark!", "error")
         return redirect(url_for("views.get_map"))
 
     if request.method == "GET":
