@@ -38,51 +38,65 @@ content %}
 
 
 <h3 align="center"> My Rewards </h3>
-<ul class="list-group list-group-flush" id="rewards">
-  {% for user_claimed_reward in user_claimed_rewards %}
-  <li class="list-group-item">
-    <div>
-      <h4><strong>{{ user_claimed_reward.reward_title }}</strong></h4>
-      {% for company in companies %}
-          {% if user_claimed_reward.user_id == company.user_id %}
-          <p><strong>Company: </strong>{{company.company_name}}</p>
-          {% endif %}
-        {% endfor %}
-      <p><strong>Category: </strong> {{ user_claimed_reward.reward_category }}</p>
-      <p><strong>Details: </strong>{{ user_claimed_reward.reward_details }}</p>
-      <p><strong>Expiry: </strong>{{user_claimed_reward.reward_expiry}}</p>
-      <p><strong>No. of Rewards left: </strong>{{user_claimed_reward.number_of_rewards}}</p>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      {% for user_claimed_reward in user_claimed_rewards %}
+      <div class="card mb-4">
+        <div class="card-body">
+          <h4 class="card-title">{{ user_claimed_reward.reward_title }}</h4>
+          {% for company in companies %}
+            {% if user_claimed_reward.user_id == company.user_id %}
+            <p class="card-text"><strong>Company: </strong>{{company.company_name}}</p>
+            {% endif %}
+          {% endfor %}
+          <p class="card-text"><strong>Category: </strong> {{ user_claimed_reward.reward_category }}</p>
+          <p class="card-text"><strong>Details: </strong>{{ user_claimed_reward.reward_details }}</p>
+          <p class="card-text"><strong>Expiry: </strong>{{user_claimed_reward.reward_expiry}}</p>
+        </div>
+      </div>
+      {% endfor %}
     </div>
-  </li>
-  {% endfor %}
-</ul>
+  </div>
+</div>
 
 
+<br />
 
+<h3 align="center"> View All Rewards </h3>
 
-<ul class="list-group list-group-flush" id="rewards">
-  {% for reward in rewards %}
-  <li class="list-group-item">
-    <div>
-      <h4><strong>{{ reward.reward_title }}</strong></h4>
-      <p><strong>Points needed: {{ reward.cost_of_reward | round | int }}</strong></p>
-      {% for company in companies %}
-          {% if reward.user_id == company.user_id %}
-          <p><strong>Company: </strong>{{company.company_name}}</p>
-          {% endif %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card-deck">
+        {% for reward in rewards %}
+        <div class="card mb-4">
+          <div class="card-body">
+            <h4 class="card-title" style="display: inline-block; margin-right: 10px;">{{ reward.reward_title }} </h4>
+              <span class="badge badge-info" style="font-size: 14px; display: inline-block;">{{ reward.cost_of_reward | round | int }} Points </span>
+            {% for company in companies %}
+              {% if reward.user_id == company.user_id %}
+              <p class="card-text"><strong>Company: </strong>{{company.company_name}}</p>
+              {% endif %}
+            {% endfor %}
+            <p class="card-text"><strong>Category: </strong> {{ reward.reward_category }}</p>
+            <p class="card-text"><strong>Details: </strong>{{ reward.reward_details }}</p>
+            <p class="card-text"><strong>Expiry: </strong>{{reward.reward_expiry}}</p>
+            <p class="card-text"><strong>No. of Rewards left: </strong>{{reward.number_of_rewards}}</p>
+            <form method="POST" action="{{ url_for('views.claim_reward') }}">
+              <input type="hidden" name="reward_id" value="{{ reward.id }}">
+              <button type="submit" class="btn btn-primary">Claim Reward</button>
+            </form>
+          </div>
+        </div>
         {% endfor %}
-      <p><strong>Category: </strong> {{ reward.reward_category }}</p>
-      <p><strong>Details: </strong>{{ reward.reward_details }}</p>
-      <p><strong>Expiry: </strong>{{reward.reward_expiry}}</p>
-      <p><strong>No. of Rewards left: </strong>{{reward.number_of_rewards}}</p>
-      <form method="POST" action="{{ url_for('views.claim_reward') }}">
-        <input type="hidden" name="reward_id" value="{{ reward.id }}">
-        <button type="submit" class="btn btn-primary">Claim Reward</button>
-      </form>
+      </div>
     </div>
-  </li>
-  {% endfor %}
-</ul>
+  </div>
+</div>
+
+
+
 
 <!-- <form method="POST" action="{{ url_for('views.claim_reward') }}">
   <div class="form-group">
