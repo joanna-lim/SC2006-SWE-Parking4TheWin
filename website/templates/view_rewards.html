@@ -36,23 +36,25 @@ content %}
   </div>
 </div> -->
 
-
 <h3 align="center"> My Rewards </h3>
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-md-8">
-      {% for user_claimed_reward in user_claimed_rewards %}
+      {% for reward in user_claimed_rewards %}
       <div class="card mb-4">
         <div class="card-body">
-          <h4 class="card-title">{{ user_claimed_reward.reward_title }}</h4>
+          <h4 class="card-title">{{ reward.reward_title }}</h4>
           {% for company in companies %}
-            {% if user_claimed_reward.user_id == company.user_id %}
+            {% if reward.user_id == company.user_id %}
             <p class="card-text"><strong>Company: </strong>{{company.company_name}}</p>
             {% endif %}
           {% endfor %}
-          <p class="card-text"><strong>Category: </strong> {{ user_claimed_reward.reward_category }}</p>
-          <p class="card-text"><strong>Details: </strong>{{ user_claimed_reward.reward_details }}</p>
-          <p class="card-text"><strong>Expiry: </strong>{{user_claimed_reward.reward_expiry}}</p>
+          <p class="card-text"><strong>Category: </strong> {{ reward.reward_category }}</p>
+          <p class="card-text"><strong>Details: </strong>{{ reward.reward_details }}</p>
+          <p class="card-text"><strong>Expiry: </strong>{{ reward.reward_expiry}}</p>
+          <button class="btn btn-primary" id="use-reward" data-toggle="modal" data-target="#qr-modal" onClick="removeUserReward({{ reward.id }})">Use Reward</button>
+        
+          
         </div>
       </div>
       {% endfor %}
@@ -60,6 +62,38 @@ content %}
   </div>
 </div>
 
+<div class="modal fade" id="qr-modal" tabindex="-1" role="dialog" aria-labelledby="qr-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="qr-modal-label">QR Code</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="qr-code">
+        <!-- QR code will be displayed here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script> <!-- add this to include the QR code generator library -->
+<script>
+  $(document).ready(function() {
+    $('#use-reward').on('click', function() {
+      var rewardId = $(this).siblings('input[name="reward_id"]').val();
+      console.log(rewardId)
+      // generate a random QR code value (for demo purposes only)
+      var qrValue = Math.random().toString(36).substr(2, 8);
+      var qr = qrcode(0, 'H');
+      qr.addData(qrValue);
+      qr.make();
+      $('#qr-code').empty().append(qr.createImgTag(4));
+    });
+  });
+</script>
 
 <br />
 
