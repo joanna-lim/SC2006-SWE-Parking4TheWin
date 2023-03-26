@@ -53,8 +53,6 @@ content %}
           <p class="card-text"><strong>Details: </strong>{{ reward.reward_details }}</p>
           <p class="card-text"><strong>Expiry: </strong>{{ reward.reward_expiry}}</p>
           <button class="btn btn-primary" id="use-reward" data-toggle="modal" data-target="#qr-modal" onClick="removeUserReward({{ reward.id }})">Use Reward</button>
-        
-          
         </div>
       </div>
       {% endfor %}
@@ -79,14 +77,11 @@ content %}
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script> <!-- add this to include the QR code generator library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script> 
 <script>
   $(document).ready(function() {
     $('#use-reward').on('click', function() {
-      var rewardId = $(this).siblings('input[name="reward_id"]').val();
-      console.log(rewardId)
-      // generate a random QR code value (for demo purposes only)
-      var qrValue = Math.random().toString(36).substr(2, 8);
+      var qrValue = "hello";
       var qr = qrcode(0, 'H');
       qr.addData(qrValue);
       qr.make();
@@ -95,6 +90,7 @@ content %}
   });
 </script>
 
+
 <br />
 
 <h3 align="center"> View All Rewards </h3>
@@ -102,7 +98,7 @@ content %}
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-md-8">
-      <div class="card-deck">
+     
         {% for reward in rewards %}
         <div class="card mb-4">
           <div class="card-body">
@@ -126,25 +122,6 @@ content %}
         {% endfor %}
       </div>
     </div>
-  </div>
-</div>
-
-
-
-
-<!-- <form method="POST" action="{{ url_for('views.claim_reward') }}">
-  <div class="form-group">
-    <label for="reward-select">Select Reward:</label>
-    <select class="form-control" id="reward-select" name="reward_id">
-      {% for reward in rewards %}
-        {% if reward.number_of_rewards > 0 %}
-          <option value="{{ reward.id }}">{{ reward.reward_title }} ({{ reward.cost_of_reward }} points)</option>
-        {% endif %}
-      {% endfor %}
-    </select>
-  </div>
-  <button type="submit" class="btn btn-primary">Claim Reward</button>
-</form> -->
 
 {% endblock %}
 
