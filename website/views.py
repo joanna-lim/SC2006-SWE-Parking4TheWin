@@ -75,7 +75,18 @@ def get_rewards():
         rewards = Reward.query.all()
         companies = Company.query.all()
         driver = Driver.query.filter_by(user_id=current_user.id).first()
-        return render_template("view_rewards.html", user=current_user, rewards=rewards, companies=companies, driver=driver)
+        user_claimed_rewards_query = UserClaimedRewards.query.filter_by(driver_user_id=current_user.id).all()
+        reward_id_list = [reward.reward_id for reward in user_claimed_rewards_query]
+        user_claimed_rewards = []
+        for id in reward_id_list:
+            temp = Reward.query.filter_by(id=id).first()
+            user_claimed_rewards.append(temp)
+        
+        print(reward_id_list)
+        print(user_claimed_rewards)
+
+       
+        return render_template("view_rewards.html", user=current_user, rewards=rewards, companies=companies, driver=driver, user_claimed_rewards=user_claimed_rewards)
     if current_user.user_type=="corporate":
         rewards = Reward.query.all()
         companies = Company.query.all()
@@ -102,7 +113,7 @@ def claim_reward():
     
     if driver.points >= reward.cost_of_reward and reward.number_of_rewards > 0:
         driver.points -= reward.cost_of_reward
-        new_claim = UserClaimedRewards(user_id=current_user.id, reward_id=reward_id)
+        new_claim = UserClaimedRewards(driver_user_id=current_user.id, reward_id=reward_id)
         db.session.add(driver)
         db.session.add(new_claim)
         db.session.commit()
@@ -111,9 +122,9 @@ def claim_reward():
         db.session.add(reward)
         db.session.commit()
 
-        flash(f"Congratulations! You have claimed the reward '{reward.reward_title}'. Your new points balance is {driver.points}.", "success")
+        flash(f"You have successfully claimed the reward '{reward.reward_title}'. Your new points balance is {driver.points}.", "success")
     else:
-        flash(f"Sorry, you do not have enough points to claim this reward or this reward is no longer available.", "danger")
+        flash(f"Sorry, you do not have enough points to claim this reward!", "error")
     
     return redirect(url_for('views.get_rewards'))
 

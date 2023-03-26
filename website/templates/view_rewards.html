@@ -36,6 +36,30 @@ content %}
   </div>
 </div> -->
 
+
+<h3 align="center"> My Rewards </h3>
+<ul class="list-group list-group-flush" id="rewards">
+  {% for user_claimed_reward in user_claimed_rewards %}
+  <li class="list-group-item">
+    <div>
+      <h4><strong>{{ user_claimed_reward.reward_title }}</strong></h4>
+      {% for company in companies %}
+          {% if user_claimed_reward.user_id == company.user_id %}
+          <p><strong>Company: </strong>{{company.company_name}}</p>
+          {% endif %}
+        {% endfor %}
+      <p><strong>Category: </strong> {{ user_claimed_reward.reward_category }}</p>
+      <p><strong>Details: </strong>{{ user_claimed_reward.reward_details }}</p>
+      <p><strong>Expiry: </strong>{{user_claimed_reward.reward_expiry}}</p>
+      <p><strong>No. of Rewards left: </strong>{{user_claimed_reward.number_of_rewards}}</p>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+
+
+
+
 <ul class="list-group list-group-flush" id="rewards">
   {% for reward in rewards %}
   <li class="list-group-item">

@@ -74,5 +74,5 @@ class CarPark(db.Model):
 
 class UserClaimedRewards(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # this user IS the claimant - not the company.
+    driver_user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # this user IS the claimant - not the company.
     reward_id = db.Column(db.Integer, db.ForeignKey('reward.id'))
