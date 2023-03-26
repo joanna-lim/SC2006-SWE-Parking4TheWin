@@ -229,11 +229,15 @@ def put_drivers():
     if intent == "delete_interested_carpark":
         # Do verification of parking image here
         # The prototype won't implement this.
+        carpark = CarPark.query.filter_by(car_park_no=driver.interested_carpark).first()
+        carpark.no_of_interested_drivers-=1
 
         driver.interested_carpark = None
         driver.points += 10
+
         flash("Thanks for uploading, you've received 10 points!")
         db.session.commit()
+        generate_geojson()
         return redirect(url_for("views.get_map"))
 
 @views.route('/parking_verification', methods=['GET'])
