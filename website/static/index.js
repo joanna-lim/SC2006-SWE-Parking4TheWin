@@ -20,6 +20,24 @@ function deleteVehicle(vehicleId) {
     }
 }
 
+function removeUserReward(rewardId) {
+    fetch('/rewards/use', {
+        method:'DELETE',
+        body: JSON.stringify({ rewardId: rewardId })
+    }).then((_res)=>{
+        // Display the modal here
+        $('#qr-modal').modal('show');
+
+        // Add event listener to close button
+        $('#qr-modal').on('hidden.bs.modal', function () {
+            // Redirect the user to the rewards page
+            window.location.href = "/rewards";
+        })
+    });
+}
+
+
+
 function changePoints(points_change){
     fetch('/points', {
         method: 'PUT',

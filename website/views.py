@@ -81,11 +81,8 @@ def get_rewards():
         for id in reward_id_list:
             temp = Reward.query.filter_by(id=id).first()
             user_claimed_rewards.append(temp)
-        
         print(reward_id_list)
         print(user_claimed_rewards)
-
-       
         return render_template("view_rewards.html", user=current_user, rewards=rewards, companies=companies, driver=driver, user_claimed_rewards=user_claimed_rewards)
     if current_user.user_type=="corporate":
         rewards = Reward.query.all()
@@ -122,11 +119,26 @@ def claim_reward():
         db.session.add(reward)
         db.session.commit()
 
-        flash(f"You have successfully claimed the reward '{reward.reward_title}'. Your new points balance is {driver.points}.", "success")
+        flash("You have successfully claimed the reward!", "success")
     else:
-        flash(f"Sorry, you do not have enough points to claim this reward!", "error")
+        flash("Sorry, you do not have enough points to claim this reward!", "error")
     
     return redirect(url_for('views.get_rewards'))
+
+@views.route('/rewards/use', methods=['DELETE'])
+def remove_user_rewards():
+    print("hello")
+    reward = json.loads(request.data)
+    rewardId = reward['rewardId']
+    reward = UserClaimedRewards.query.filter_by(driver_user_id=current_user.id).filter_by(reward_id=rewardId).first()
+    if reward:
+        db.session.delete(reward)
+        db.session.commit()
+        flash("You have successfully used this reward!", "success")
+        return jsonify({'status': 'success'})
+    else:
+        return jsonify({'status': 'error'})
+    
 
 ################################
 ##### corporate views here #####
