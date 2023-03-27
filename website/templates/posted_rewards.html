@@ -7,8 +7,8 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-8">
-        {% for reward in rewards %}
-        
+        {% for reward in rewards  %}
+        {% if reward.user_id == current_user.id %}
         <div class="card mb-4">
           <div class="card-body">
             <button type="button" class="close" onClick="deleteReward('{{ reward.id }}')">
@@ -26,6 +26,7 @@
             <p class="card-text"><strong>No. of Rewards left </strong>{{ reward.number_of_rewards}}</p>
           </div>
         </div>
+        {% endif %}
         {% endfor %}
       </div>
     </div>
