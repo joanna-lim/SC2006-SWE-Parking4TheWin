@@ -233,9 +233,9 @@ def put_drivers():
         carpark.no_of_interested_drivers-=1
 
         driver.interested_carpark = None
-        driver.points += 10
+        driver.points += 1
 
-        flash("Thanks for uploading, you've received 10 points!")
+        flash("Thanks for uploading, you've received 1 point!")
         db.session.commit()
         generate_geojson()
         return redirect(url_for("views.get_map"))
