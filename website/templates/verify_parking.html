@@ -1,35 +1,78 @@
 {% extends "base.html" %} {% block title %} Verify parking {% endblock %} {% block
     content %}
-<h3 align="center">Verify Parking</h3>
 
+<br />
+
+<h3 align="center">Verify Parking</h3>
 <div class="container d-flex flex-column align-items-center">
-    <form id="validation-form">
-      <div class="form-group">
-        <label for="imageUpload">Upload picture of your parked car for verification</label>
-        <div class="custom-file">
-          <input type="file" accept="image/png, image/jpeg" class="custom-file-input" id="imageUpload" name="image">
-          <label class="custom-file-label" for="imageUpload">Choose file</label>
-        </div>
+  <form id="validation-form" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="imageUpload">Upload Picture of Parked Car for Verification</label>
+      <div class="custom-file">
+        <input type="file" accept="image/png, image/jpeg" class="custom-file-input" id="imageUpload" name="image">
+        <label class="custom-file-label" for="imageUpload">Choose file</label>
       </div>
-      <button class="btn btn-primary">
-        Submit
-      </button>
-    </form>
-    <i>I can't get image upload working. But this is good enough as it is.</i>
+      <div id="imagePreview" class="mt-2"></div>
+    </div>
+    <button class="btn btn-primary" id="submitBtn" disabled>
+      Submit
+    </button>
+    <button class="btn btn-danger ml-2 d-none" id="deleteBtn">
+      Delete
+    </button>
+  </form>
 </div>
 
 <script>
+  const validForm = document.getElementById("validation-form");
+  const imageUpload = document.getElementById("imageUpload");
+  const imagePreview = document.getElementById("imagePreview");
+  const submitBtn = document.getElementById("submitBtn");
+  const deleteBtn = document.getElementById("deleteBtn");
 
-validForm = document.getElementById("validation-form");
+  imageUpload.addEventListener("change", function() {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function() {
+        const img = document.createElement("img");
+        img.src = reader.result;
+        img.classList.add("mw-100");
+        img.style.maxHeight = "300px";
+        img.style.objectFit = "contain";
+        imagePreview.innerHTML = "";
+        imagePreview.appendChild(img);
 
-validForm.addEventListener("submit", async function(event) {
-  event.preventDefault();
-  await fetch('/drivers', {
-          method: 'PUT',
-          body: JSON.stringify({ intent : "delete_interested_carpark"})
+        submitBtn.disabled = false;
+        deleteBtn.classList.remove("d-none");
+      };
+      reader.readAsDataURL(file);
+    } else {
+      imagePreview.innerHTML = "";
+      submitBtn.disabled = true;
+      deleteBtn.classList.add("d-none");
+    }
   });
-  window.location.href = "/map";
-});
+
+  deleteBtn.addEventListener("click", function() {
+    event.preventDefault();
+    imageUpload.value = null;
+    imagePreview.innerHTML = "";
+    submitBtn.disabled = true;
+    deleteBtn.classList.add("d-none");
+  });
+
+  validForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+    const formData = new FormData(validForm);
+    await fetch('/drivers', {
+      method: 'PUT',
+      body: JSON.stringify({ intent: "delete_interested_carpark" })
+    });
+    window.location.href = "/map";
+  });
 </script>
+
+
 
 {% endblock %} 
