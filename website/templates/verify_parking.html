@@ -5,17 +5,22 @@
 <div class="container d-flex flex-column align-items-center">
     <form id="validation-form">
       <div class="form-group">
-        <label for="imageUpload">Upload picture of your parked car for verification</label>
-        <div class="custom-file">
+        <h5 for="imageUpload">Upload picture of your parked car for verification</h5>
+        <!-- <div class="custom-file">
           <input type="file" accept="image/png, image/jpeg" class="custom-file-input" id="imageUpload" name="image">
           <label class="custom-file-label" for="imageUpload">Choose file</label>
+        </div> -->
+        <div class="input-group mb-3">
+          <input type="file" accept="image/png, image/jpeg" class="form-control" id="file">
+          <label class="input-group-text" for="file">Browse</label>
         </div>
+  
       </div>
       <button class="btn btn-primary">
         Submit
       </button>
     </form>
-    <i>I can't get image upload working. But this is good enough as it is.</i>
+    <!-- <i>I can't get image upload working. But this is good enough as it is.</i> -->
 </div>
 
 <script>
