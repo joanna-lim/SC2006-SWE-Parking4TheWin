@@ -95,10 +95,10 @@ def post_driver_signup():
     """
 
     if driver:
-        flash('An account has already been created with this email', category='error')
+        flash('An account has already been created with this email!', category='error')
     
     elif len(password1) < 8:
-        flash('Password should be at least 8 characters :(', category='error')
+        flash('Password should be at least 8 characters!', category='error')
         
     elif password1!=password2:
         flash('Passwords don\'t match :(', category='error')
@@ -136,10 +136,10 @@ def post_corporate_sign_up():
     """
 
     if company:
-        flash('An account has already been created with this UEN', category='error')
+        flash('An account has already been created with this UEN!', category='error')
     
     elif len(password1) < 8:
-        flash('Password should be at least 8 characters :(', category='error')
+        flash('Password should be at least 8 characters!', category='error')
         
     elif password1!=password2:
         flash('Passwords don\'t match :(', category='error')
