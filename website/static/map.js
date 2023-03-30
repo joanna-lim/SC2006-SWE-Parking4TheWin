@@ -46,7 +46,7 @@ async function findCarparkFromNo(carparkNo) {
   return null;    // this shouldn't happen
 }
 
-// For a carpark object, find the distance of the carpark from the given coordinate first
+// For a carpark object, find the distance of the carpark from the given center coordinate
 // and add it to the carpark object
 function addDistanceToCarpark(coordinates, carpark) {
   const carparkCoordinate = carpark.geometry.coordinates;
@@ -132,7 +132,9 @@ async function updateInterestedCarpark(address, carParkNo) {
         var i = Number($("#mapboxgl-popup-content-interested").text());
         i++;
         $("#mapboxgl-popup-content-interested").text(i);
-        updateNearbyCarparksList(null, await findCarparkFromNo(window.interestedCarparkNo));
+        var newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo);
+        storedInterestedCarpark = {...newInterestedCarpark};
+        updateInterestedCarparkUI();
       } else { // User Clicked on "I'm no longer interested" button.
         window.interestedCarparkNo = null;
         storedInterestedCarpark = null;
@@ -140,7 +142,8 @@ async function updateInterestedCarpark(address, carParkNo) {
         var i = Number($("#mapboxgl-popup-content-interested").text());
         i--;
         $("#mapboxgl-popup-content-interested").text(i);
-        updateNearbyCarparksList(null, null);
+        storedInterestedCarpark = null;
+        updateInterestedCarparkUI();
       }
     }
   } catch (error) {
@@ -168,10 +171,11 @@ async function search() {
     var coordinates = data.features[0].center;
     const radiusInKm = parseFloat(radiusInput.value);
 
-    placeSearchMarker(coordinates, data.features[0].place_name);
-    centerMap(coordinates, radiusInKm);
-    var nearbyCarparks = await findNearbyCarparks(coordinates, radiusInKm);
-    updateNearbyCarparksList(nearbyCarparks, null);
+    placeSearchMarkerUI(coordinates, data.features[0].place_name);
+    centerMapUI(coordinates, radiusInKm);
+    const newNearbyCarparks = await findNearbyCarparks(coordinates, radiusInKm);
+    storedNearbyCarparks = newNearbyCarparks;
+    updateNearbyCarparksListUI();
 
   } catch (error) {
     return console.error(error);
@@ -219,7 +223,11 @@ async function loadGeoJSONData() {
   });
 }
 
-function createCarparksListItem(carpark, interested) {
+// Creates and returns a carparks list item UI (button)
+// If `interested` is true, then the list item will be styled differently
+// Moreover, tag the list item UI with `item_id` to make it easier
+// to change with jquery
+function createCarparksListItemUI(carpark, interested, item_id) {
   const carparkCoordinate = carpark.geometry.coordinates;
   const properties = carpark.properties;
   const address = properties.address;
@@ -228,6 +236,7 @@ function createCarparksListItem(carpark, interested) {
 
   const button = $("<button/>", {
     type: "button",
+    id: item_id,
     class: "list-group-item list-group-item-action",
     html: `${address}<br>
               <span class="badge badge-secondary badge-pill">${vacancyPercentage}% Vacant</span>`
@@ -246,7 +255,7 @@ function createCarparksListItem(carpark, interested) {
     // center map on selected carpark
     // radius 2.5 is the best because if you zoom in too much, then it will be disorienting
     // for the user, if you zoom out too much, then the click event might trigger on the wrong carpark
-    centerMap(carparkCoordinate, 2.5);
+    centerMapUI(carparkCoordinate, 2.5);
 
     /* Trigger the click event at the specified latitude and longitude
     this will create a Carpark popup. This introduces some visual artifacts
@@ -258,52 +267,49 @@ function createCarparksListItem(carpark, interested) {
   return button;
 }
 
-// Update the nearby carparks list on the sidebar
-// coordinates is the center of the search parameter/circle
-// THIS FUNCTION IS WRITTEN HORRIBLY
-// If you want to update the list with a new nearbycarpark: uNCL(newcarpark, null)
-// If you want to update the list with a new interestedcarpark: uNCL(null, interestedcarpark)
-// If you want to delete interestedcarpark: set storedInterestedCarpark = null and run uNCL(null, null);
-function updateNearbyCarparksList(nearbyCarparks, interestedCarpark) {
+// Update nearby carparks list UI with value in storedNearbyCarparks
+function updateNearbyCarparksListUI() {
   const nearbyCarparksList = $("#nearby-carparks-list");
 
-  nearbyCarparksList.empty();
+  storedNearbyCarparks.forEach((carpark) => {
+    
+    const coordinates = carpark.geometry.coordinates;
+    const properties = carpark.properties;
 
-  // Update interested carpark
-  if (interestedCarpark !== null) {
-    storedInterestedCarpark = {...interestedCarpark};
-  }
+    // Skip the interested carpark
+    if (properties.car_park_no === window.interestedCarparkNo) {
+      return;
+    }
+    
+    const address = properties.address;
+    const vacancyPercentage = properties.vacancy_percentage;
+    const distanceInKM = properties.distanceInKM;
 
-  if (storedInterestedCarpark !== null) {
-    nearbyCarparksList.append(createCarparksListItem(storedInterestedCarpark, true))
-  }
-
-  // Update nearby carpark
-  if (nearbyCarparks !== null) {
-    storedNearbyCarparks = nearbyCarparks;
-  }
-
-  if (storedNearbyCarparks !== null) {
-    storedNearbyCarparks.forEach((carpark) => {
-      
-      const coordinates = carpark.geometry.coordinates;
-      const properties = carpark.properties;
-  
-      // Skip the interested carpark
-      if (properties.car_park_no === window.interestedCarparkNo) {
-        return;
-      }
-      
-      const address = properties.address;
-      const vacancyPercentage = properties.vacancy_percentage;
-      const distanceInKM = properties.distanceInKM;
-  
-      nearbyCarparksList.append(createCarparksListItem(carpark, false));
-    });
-  }  
+    nearbyCarparksList.append(createCarparksListItemUI(carpark, false, "nearby-carpark-list-item-" + properties.car_park_no));
+  });  
 }
 
-function placeSearchMarker(coordinates, placeName) {
+// Update interested carpark UI with value in storedInterestedCarpark
+function updateInterestedCarparkUI() {
+  const nearbyCarparksList = $("#nearby-carparks-list");
+  
+  if (storedInterestedCarpark === null) {
+    $('#interested-carpark-list-item').remove();
+    return;
+  }
+
+  newInterestCarparkItem = createCarparksListItemUI(storedInterestedCarpark, true, "interested-carpark-list-item");
+
+  if($('#interested-carpark-list-item').length){ // this tests if interested carpark list item exists
+    $('#interested-carpark-list-item').replaceWith(newInterestCarparkItem);
+  }else{
+    nearbyCarparksList.prepend(newInterestCarparkItem);
+  }
+}
+
+// Place a search marker at the coordinate on the map
+// A search marker is different from a Pop Up
+function placeSearchMarkerUI(coordinates, placeName) {
   // remove search marker if it exists already.
   if (searchMarker !== null) {
     searchMarker.remove();
@@ -321,7 +327,7 @@ function placeSearchMarker(coordinates, placeName) {
 }
 
 // Center map on the given coordinate and radius (in km)
-function centerMap(coordinates = null, radius = null) {
+function centerMapUI(coordinates = null, radius = null) {
   // Use the current map center if coordinate is not given
   if (coordinates === null) {
     coordinates = map.getCenter().toArray();
@@ -352,19 +358,20 @@ function centerMap(coordinates = null, radius = null) {
 /////////////////////////////////////////////////////////////////////////////
 
 
-async function initialSetup() {
+async function initialSetupUI() {
   loadGeoJSONData();
-  carpark = await findCarparkFromNo(window.interestedCarparkNo);
-  updateNearbyCarparksList(null, carpark);
+  const newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo);
+  storedInterestedCarpark = {...newInterestedCarpark};
+  updateInterestedCarparkUI();
 }
 
-initialSetup();
+initialSetupUI();
 
 
 // The radius input also controls the map zoom level
 radiusInput.addEventListener("input", function () {
   $("#radius-label").text(`${radiusInput.value} km`);
-  centerMap(null, parseFloat(radiusInput.value))
+  centerMapUI(null, parseFloat(radiusInput.value))
 });
 
 
