@@ -74,13 +74,17 @@
         .radius-wrapper label {
           margin-right: 10px;
         }
+
+        .sort-unfocused {
+          opacity: 0.5;
+        }
       </style>
 {% endblock %}
 
 {% block content%}
   <div class="container-fluid" style="height: calc(100vh - var(--navbar-min-height));">
     <div class="row h-100" >  
-      <div class="col-2">
+      <div class="col-2 p-2">
         <div>
           <form id="search-form">
             <div class="form-group">
@@ -105,12 +109,36 @@
           </form>
         </div>
         <div>
-          <ul class="list-group list-group-flush" style="height: 55vh; overflow-y:auto;" id="nearby-carparks-list">
+          <ul class="list-group list-group-flush" style="height: 50vh; overflow-y:auto;" id="nearby-carparks-list">
             <!-- To be filled with Interested Carpark and nearby carparks -->
           </ul>
         </div>
+        <div class="d-flex justify-content-around m-2">
+          <button class="btn btn-secondary btn-sm rounded-top" style="width: 40%; display: none;" id="vacancy-sort-button">
+            <svg class="sort-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px;">
+              <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+              <path fill="#FFFFFF" d="M182.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-9.2 9.2-11.9 22.9-6.9 34.9s16.6 19.8 29.6 19.8H288c12.9 0 24.6-7.8 29.6-19.8s2.2-25.7-6.9-34.9l-128-128z"/>
+            </svg>
+            <svg class="sort-down" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px; display: none;">
+              <!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) -->
+              <path fill="#FFFFFF" d="M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z"/>
+            </svg>
+            Vacancy
+          </button>
+          <button class="btn btn-success btn-sm rounded-top" style="width: 40%; display: none" id="distance-sort-button">
+            <svg class="sort-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px;">
+              <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+              <path fill="#FFFFFF" d="M182.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-9.2 9.2-11.9 22.9-6.9 34.9s16.6 19.8 29.6 19.8H288c12.9 0 24.6-7.8 29.6-19.8s2.2-25.7-6.9-34.9l-128-128z"/>
+            </svg>
+            <svg class="sort-down" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px; display: none;">
+              <!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) -->
+              <path fill="#FFFFFF" d="M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z"/>
+            </svg>
+            Distance
+          </button>
+        </div>
         <div class="row justify-content-center m-1" style="max-height: 5vh;">
-          <a href="/parking_verification" class="btn btn-primary" style="display: none;" id="i-have-parked-btn">I have parked</a>
+          <a draggable="false" href="/parking_verification" class="btn btn-primary" style="display: none;" id="i-have-parked-btn">I have parked</a>
         </div>
       </div>
       <div class="col" id="map">

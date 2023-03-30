@@ -1,4 +1,5 @@
 /*
+  BEHOLD THE GLORY OF PURE JS WITHOUT MODULES
   Structure of file
   ----
   Consts
@@ -13,19 +14,26 @@
 
 mapboxgl.accessToken = window.MAPBOX_SECRET_KEY;
 
+var geojsonData = null;
 var map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/streets-v12",
   center: [103.8198, 1.3521],
   zoom: 12,
 });
+
 var searchForm = document.getElementById("search-form");
 var locationInput = document.getElementById("location-input");
 var radiusInput = document.getElementById("radius-input");
 var searchMarker = null;    // there can only be one search marker at a time
+
 var storedInterestedCarpark = null; // this is different from window.interestedCarparkNo
 var storedNearbyCarparks = null;
-var geojsonData = null;
+
+// this won't be set untill the user searches for something
+var sortType = null; // 'vacancy' or 'distance'
+var sortOrder = null; // 'asc' or 'desc'
+var oldSortOrder = null;
 
 // Jinja passes interested carpark as "None" instead of null
 // Ensure that it is null
@@ -54,7 +62,7 @@ function addDistanceToCarpark(coordinates, carpark) {
                             turf.point(carparkCoordinate),
                             { units: 'kilometers' })
                             .toFixed(1);
-  carpark.properties.distanceInKM = distanceInKM;
+  carpark.properties.distanceInKM = parseFloat(distanceInKM);
 }
 
 // Determines if "carparks-data" and "carparks-layer" are ready
@@ -153,6 +161,34 @@ async function updateInterestedCarpark(address, carParkNo) {
   }
 };
 
+// Sort stored nearby carparks based on sortType and sortOrder
+// Note that this must be used in conjunction with updateNearbyCarparksUI
+function sortStoredNearbyCarparks() {
+  if (storedNearbyCarparks === null || sortOrder === null || sortType === null) return;
+
+  if (sortType === "distance") {
+    if (sortOrder === "asc") {
+      storedNearbyCarparks.sort((a, b) => {
+        return a.properties.distanceInKM - b.properties.distanceInKM;
+      });
+    } else {
+      storedNearbyCarparks.sort((a, b) => {
+        return b.properties.distanceInKM - a.properties.distanceInKM;
+      });
+    }
+  } else {
+    if (sortOrder === "asc") {
+      storedNearbyCarparks.sort((a, b) => {
+        return a.properties.vacancy_percentage- b.properties.vacancy_percentage;
+      });
+    } else {
+      storedNearbyCarparks.sort((a, b) => {
+        return b.properties.vacancy_percentage- a.properties.vacancy_percentage;
+      });
+    }
+  }
+}
+
 // Search for a location first and then the nearby carparks
 // and update the nearby carpark lists
 async function search() {
@@ -177,8 +213,17 @@ async function search() {
     centerMapUI(coordinates, radiusInKm);
     const newNearbyCarparks = await findNearbyCarparks(coordinates, radiusInKm);
     storedNearbyCarparks = newNearbyCarparks;
-    updateNearbyCarparksListUI();
 
+    // if user is searching for the first time
+    if (sortType === null) {
+      sortType = 'vacancy';
+      sortOrder = 'desc';
+    }
+
+    sortStoredNearbyCarparks();
+    updateNearbyCarparksListUI();
+    showSortButtonsUI();
+    updateSortButtonsUI();
   } catch (error) {
     return console.error(error);
   }
@@ -241,7 +286,7 @@ function createCarparksListItemUI(carpark, interested, item_id) {
     id: item_id,
     class: "list-group-item list-group-item-action",
     html: `${address}<br>
-              <span class="badge badge-secondary badge-pill">${vacancyPercentage}% Vacant</span>`
+              <span class="badge badge-secondary badge-pill mr-1">${vacancyPercentage}% Vacant</span>`
   });
 
   if (typeof distanceInKM !== 'undefined' && distanceInKM !== null) {
@@ -272,6 +317,11 @@ function createCarparksListItemUI(carpark, interested, item_id) {
 // Update nearby carparks list UI with value in storedNearbyCarparks
 function updateNearbyCarparksListUI() {
   const nearbyCarparksList = $("#nearby-carparks-list");
+
+  if (storedNearbyCarparks === null) return;
+
+  nearbyCarparksList.empty();
+  updateInterestedCarparkUI();
 
   storedNearbyCarparks.forEach((carpark) => {
     
@@ -306,6 +356,36 @@ function updateInterestedCarparkUI() {
     $('#interested-carpark-list-item').replaceWith(newInterestCarparkItem);
   }else{
     nearbyCarparksList.prepend(newInterestCarparkItem);
+  }
+}
+
+function showSortButtonsUI() {
+  $("#distance-sort-button").show();
+  $("#vacancy-sort-button").show();
+}
+
+// yes, the code is very repetitive
+function updateSortButtonsUI() {
+  if (sortType === "distance") {
+    $("#vacancy-sort-button").addClass("sort-unfocused");
+    $("#distance-sort-button").removeClass("sort-unfocused");
+    if (sortOrder === "asc") {
+      $("#distance-sort-button").find(".sort-up").show();
+      $("#distance-sort-button").find(".sort-down").hide();
+    } else {
+      $("#distance-sort-button").find(".sort-down").show();
+      $("#distance-sort-button").find(".sort-up").hide();
+    }
+  } else {
+    $("#distance-sort-button").addClass("sort-unfocused");
+    $("#vacancy-sort-button").removeClass("sort-unfocused");
+    if (sortOrder === "asc") {
+      $("#vacancy-sort-button").find(".sort-up").show();
+      $("#vacancy-sort-button").find(".sort-down").hide();
+    } else {
+      $("#vacancy-sort-button").find(".sort-down").show();
+      $("#vacancy-sort-button").find(".sort-up").hide();
+    }
   }
 }
 
@@ -412,6 +492,35 @@ searchForm.addEventListener("submit", async function(event) {
 // Set initial value of radius label (without jquery)
 document.getElementById("radius-label").textContent = radiusInput.value + "km";
 
+document.getElementById("distance-sort-button").addEventListener("click", () => {
+  if (sortType !== "distance") {
+    let temp = sortOrder;
+    sortType = "distance";
+    sortOrder = oldSortOrder === null ? "asc" : oldSortOrder;
+    oldSortOrder = temp;
+  } else {
+    // toggle
+    sortOrder = sortOrder === "asc" ? "desc" : "asc";
+  }
+  sortStoredNearbyCarparks();
+  updateNearbyCarparksListUI();
+  updateSortButtonsUI();
+});
+
+document.getElementById("vacancy-sort-button").addEventListener("click", () => {
+  if (sortType !== "vacancy") {
+    let temp = sortOrder;
+    sortType = "vacancy";
+    sortOrder = oldSortOrder === null ? "asc" : oldSortOrder;
+    oldSortOrder = temp;
+  } else {
+    // toggle
+    sortOrder = sortOrder === "asc" ? "desc" : "asc";
+  }
+  sortStoredNearbyCarparks();
+  updateNearbyCarparksListUI();
+  updateSortButtonsUI();
+});
 
 // Display popup containing carpark information when clicking on a pin
 map.on("click", "carparks-layer", (e) => {
