@@ -135,6 +135,7 @@ async function updateInterestedCarpark(address, carParkNo) {
         var newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo);
         storedInterestedCarpark = {...newInterestedCarpark};
         updateInterestedCarparkUI();
+        updateIHaveParkedButtonUI();
       } else { // User Clicked on "I'm no longer interested" button.
         window.interestedCarparkNo = null;
         storedInterestedCarpark = null;
@@ -144,6 +145,7 @@ async function updateInterestedCarpark(address, carParkNo) {
         $("#mapboxgl-popup-content-interested").text(i);
         storedInterestedCarpark = null;
         updateInterestedCarparkUI();
+        updateIHaveParkedButtonUI()
       }
     }
   } catch (error) {
@@ -307,6 +309,14 @@ function updateInterestedCarparkUI() {
   }
 }
 
+function updateIHaveParkedButtonUI() {
+  if (storedInterestedCarpark === null) {
+    $('#i-have-parked-btn').hide();
+  } else {
+    $('#i-have-parked-btn').show();
+  }
+}
+
 // Place a search marker at the coordinate on the map
 // A search marker is different from a Pop Up
 function placeSearchMarkerUI(coordinates, placeName) {
@@ -357,12 +367,13 @@ function centerMapUI(coordinates = null, radius = null) {
 ////////////////                                      ////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
-
+// 
 async function initialSetupUI() {
   loadGeoJSONData();
   const newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo);
   storedInterestedCarpark = {...newInterestedCarpark};
   updateInterestedCarparkUI();
+  updateIHaveParkedButtonUI();
 }
 
 initialSetupUI();
