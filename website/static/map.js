@@ -132,16 +132,18 @@ async function getUserLocation() {
         centerMapUI(storedUserLocation);
 
       }, async function(error) {
-        // handle error if user denies permission
-        alert("Setting your location to 103.8198, 1.3521");
-        storedUserLocation = [103.8198, 1.3521];
+        // use the center of map as user location if permission is denied.
+        const centerOfMap = map.getCenter();
+        storedUserLocation = [centerOfMap.lng, centerOfMap.lat];
+
         await updateRouteUI();
         updateUserLocationUI();
         centerMapUI(storedUserLocation);
       });
     } else {
-      alert("Setting your location to 103.8198, 1.3521");
-      storedUserLocation = [103.8198, 1.3521];
+      const centerOfMap = map.getCenter();
+      storedUserLocation = [centerOfMap.lng, centerOfMap.lat];
+
       await updateRouteUI();
       updateUserLocationUI();
       centerMapUI(storedUserLocation);
