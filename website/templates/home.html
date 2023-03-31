@@ -2,8 +2,8 @@
 {% block title %} Home {% endblock %}
 
 {% block headcontent %}
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script defer src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <link
     href="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css"
     rel="stylesheet"
@@ -142,14 +142,18 @@
         </div>
       </div>
       <div class="col" id="map">
-        <script>
-          var MAPBOX_SECRET_KEY = '{{ MAPBOX_SECRET_KEY }}';
-          var interestedCarparkNo = '{{ interested_carpark }}';
-          var hasVehicle = {{ has_vehicle|lower }};
-        </script>
-        <script src="static/map.js"></script>
+        <!-- This is for the Mapbox GL map, to be loaded using scripts. -->
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block bodyscripts %}
+<script defer>
+  var MAPBOX_SECRET_KEY = '{{ MAPBOX_SECRET_KEY }}';
+  var interestedCarparkNo = '{{ interested_carpark }}';
+  var hasVehicle = {{ has_vehicle|lower }};
+</script>
+<script defer src="static/map.js"></script>
 {% endblock %}
