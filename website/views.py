@@ -42,7 +42,6 @@ def post_coe():
     full_name = request.form.get('fullName')
     car_plate = request.form.get('carPlate')
     coe_expiry_html = request.form.get('coeExpiry')
-    coe_expiry = datetime.strptime(coe_expiry_html, '%Y-%m-%d').date()
 
     vehicle =  Vehicle.query.filter_by(car_plate=car_plate).first()
     if vehicle:
@@ -65,6 +64,7 @@ def post_coe():
         flash('COE expiry cannot be empty!', 'error')
     
     else: 
+        coe_expiry = datetime.strptime(coe_expiry_html, '%Y-%m-%d').date()
         new_vehicle = Vehicle(full_name=full_name, car_plate=car_plate, coe_expiry=coe_expiry, user_id=current_user.id)
         db.session.add(new_vehicle) 
         db.session.commit()
@@ -176,7 +176,6 @@ def post_rewards_creation():
     reward_category = request.form.get('rewardCategory')
     number_of_rewards = request.form.get('numberOfRewards')
     cost_of_reward = request.form.get('costOfReward')
-    reward_expiry = datetime.strptime(reward_expiry_html, '%Y-%m-%d').date()
 
     if len(reward_title) > 150: 
         flash('Reward title too long!', 'error')
@@ -203,6 +202,7 @@ def post_rewards_creation():
         flash('Cost of reward is too high!', 'error')
     
     else: 
+        reward_expiry = datetime.strptime(reward_expiry_html, '%Y-%m-%d').date()
         new_reward = Reward(reward_title=reward_title, reward_expiry=reward_expiry, reward_details=reward_details, user_id= current_user.id, reward_category=reward_category, number_of_rewards=number_of_rewards, cost_of_reward=cost_of_reward)
         db.session.add(new_reward) 
         db.session.commit()
