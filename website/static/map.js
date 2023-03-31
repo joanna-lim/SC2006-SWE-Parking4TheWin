@@ -30,10 +30,14 @@ var searchMarker = null;    // there can only be one search marker at a time
 var storedInterestedCarpark = null; // this is different from window.interestedCarparkNo
 var storedNearbyCarparks = null;
 
+// sort attributes related to sorting of nearby carparks
 // this won't be set untill the user searches for something
 var sortType = null; // 'vacancy' or 'distance'
 var sortOrder = null; // 'asc' or 'desc'
 var oldSortOrder = null;
+
+var storedUserLocation = null;
+var userMarker = null;
 
 // Jinja passes interested carpark as "None" instead of null
 // Ensure that it is null
@@ -80,6 +84,69 @@ async function waitTillTargetReady(isTargetReady, milliseconds) {
       // wait 1 second before retrying
       await new Promise(resolve => setTimeout(resolve, milliseconds));
     }
+}
+
+// Get directions from one point to another using mapbox directions API
+async function getRoute(fromCoordinates, toCoordinates) {
+  try {
+    var apiUrl = 'https://api.mapbox.com/directions/v5/mapbox/driving/' +
+                    fromCoordinates[0] + ',' + fromCoordinates[1] + ';' + 
+                    toCoordinates[0] + ',' + toCoordinates[1] +
+                    '?access_token=' + mapboxgl.accessToken +
+                    '&geometries=geojson';
+
+    //https://api.mapbox.com/directions/v5/mapbox/driving/13.43,52.51;13.42,52.5;13.41,52.5?radiuses=40;;100&geometries=polyline6&access_token=pk.eyJ1IjoibWs0M3YzciIsImEiOiJjbGVzZHNxM28wNnE3M3RwZHhzZXp2dWR1In0._gNdJ2q7jhgHBYXIN5-Q9g
+
+    response = await fetch(apiUrl);
+    data = await response.json();
+
+    return data.routes[0].geometry.coordinates;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function updateUserLocationUI() {
+  if (userMarker !== null) {
+    userMarker.remove();
+  }
+    
+  userMarker = new mapboxgl.Marker()
+      .setLngLat(storedUserLocation)
+      .setPopup(new mapboxgl.Popup().setHTML('You are here.'))
+      .addTo(map);
+}
+
+// This will prompt the user for their location and then update the marker
+// and routes
+async function getUserLocation() {
+  // check if geolocation permission is granted
+  navigator.permissions.query({name:'geolocation'}).then(async function(permissionStatus) {
+    if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') {
+      navigator.geolocation.getCurrentPosition(async function(position) {
+        const { latitude, longitude } = position.coords;
+
+        storedUserLocation = [longitude, latitude];
+        await updateRouteUI();
+        updateUserLocationUI();
+        centerMapUI(storedUserLocation);
+
+      }, async function(error) {
+        // handle error if user denies permission
+        alert("Setting your location to 103.8198, 1.3521");
+        storedUserLocation = [103.8198, 1.3521];
+        await updateRouteUI();
+        updateUserLocationUI();
+        centerMapUI(storedUserLocation);
+      });
+    } else {
+      alert("Setting your location to 103.8198, 1.3521");
+      storedUserLocation = [103.8198, 1.3521];
+      await updateRouteUI();
+      updateUserLocationUI();
+      centerMapUI(storedUserLocation);
+    }
+  });
 }
 
 async function findNearbyCarparks(coordinates, radiusInKm) {
@@ -150,11 +217,6 @@ async function updateInterestedCarpark(address, carParkNo) {
     });
     const data = await response.json();
 
-    interestedButton.find(".spinner-border").hide();
-    interestedButton.find(".disabled-label").hide();
-    interestedButton.find(".enabled-label").show();
-    interestedButton.prop('disabled', false);
-
     if (data.success) {
       window.geojsonData = data.updatedgeojsondata;
       map.getSource("carparks-data").setData({
@@ -177,11 +239,7 @@ async function updateInterestedCarpark(address, carParkNo) {
         var i = Number(interestedContent.text());
         i++;
         interestedContent.text(i);
-        
-        // Update sidebar
         storedInterestedCarpark = {...newInterestedCarpark};
-        updateInterestedCarparkUI();
-        updateIHaveParkedButtonUI();
       } else { // User Clicked on "I'm no longer interested" button.
         window.interestedCarparkNo = null;
         storedInterestedCarpark = null;
@@ -190,10 +248,20 @@ async function updateInterestedCarpark(address, carParkNo) {
         i--;
         interestedContent.text(i);
         storedInterestedCarpark = null;
-        updateInterestedCarparkUI();
-        updateIHaveParkedButtonUI()
       }
     }
+    // Update side
+    updateInterestedCarparkUI();
+    updateIHaveParkedButtonUI()
+    // Update route
+    await updateRouteUI();
+
+    interestedButton.find(".spinner-border").hide();
+    interestedButton.find(".disabled-label").hide();
+    interestedButton.find(".enabled-label").show();
+    interestedButton.prop('disabled', false);
+
+
   } catch (error) {
     return console.error(error);
   }
@@ -481,6 +549,74 @@ function centerMapUI(coordinates = null, radius = null) {
   map.fitBounds(bounds);
 }
 
+// Ensure that the route is removed, if there is any
+async function removeRouteUI() {
+  if (map.getLayer("route")) {
+    map.removeLayer("route");
+  }
+
+  if (map.getSource("route")) {
+      map.removeSource("route");
+  }
+}
+
+// Display the route from one point to another on the map 
+async function displayRouteUI(fromCoordinates, toCoordinates) {
+  try {
+    const routeCoordinates = await getRoute(fromCoordinates, toCoordinates);
+
+    // Wait untill map is loaded and carparks are ready
+    await waitTillTargetReady(() => {
+      return isMapLoaded() && isCarparksReady();
+    }, 100);
+    
+    // remove old route
+    await removeRouteUI();
+
+    map.addSource('route', {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: routeCoordinates
+        }
+      }
+    });
+
+    map.addLayer({
+      id: 'route',
+      type: 'line',
+      source: 'route',
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': '#0069D9',
+        'line-width': 6
+      }
+    });
+
+  } catch(error) {
+    console.error(error);
+  }
+}
+
+async function updateRouteUI() {
+  try {
+    if (storedInterestedCarpark === null) {
+      await removeRouteUI();
+      return;
+    }
+
+    toCoordinates = storedInterestedCarpark.geometry.coordinates ;
+    await displayRouteUI(storedUserLocation, toCoordinates);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////                                      ////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -494,6 +630,12 @@ async function initialSetupUI() {
   }
   updateInterestedCarparkUI();
   updateIHaveParkedButtonUI();
+
+  // Set default user location to the middle of Singapore
+  storedUserLocation = [103.8198, 1.3521];
+  updateUserLocationUI();
+
+  updateRouteUI();
 }
 
 initialSetupUI();
@@ -561,6 +703,8 @@ document.getElementById("vacancy-sort-button").addEventListener("click", () => {
   updateNearbyCarparksListUI();
   updateSortButtonsUI();
 });
+
+document.getElementById("get-user-location-btn").addEventListener("click", getUserLocation);
 
 // Display popup containing carpark information when clicking on a pin
 map.on("click", "carparks-layer", (e) => {
