@@ -111,7 +111,7 @@ function updateUserLocationUI() {
     userMarker.remove();
   }
     
-  userMarker = new mapboxgl.Marker()
+  userMarker = new mapboxgl.Marker({color: "blue"})
       .setLngLat(storedUserLocation)
       .setPopup(new mapboxgl.Popup().setHTML('You are here.'))
       .addTo(map);
