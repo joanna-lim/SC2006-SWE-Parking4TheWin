@@ -133,6 +133,14 @@ async function findNearbyCarparks(coordinates, radiusInKm) {
 // and then the popup info
 async function updateInterestedCarpark(address, carParkNo) {
   try {
+    interestedButton = $("#mapboxgl-popup-content-button");
+    interestedContent = $("#mapboxgl-popup-content-interested"); // text containing the # of interested drivers
+
+    interestedButton.prop('disabled', true);
+    interestedButton.find(".enabled-label").hide();
+    interestedButton.find(".disabled-label").show();
+    interestedButton.find(".spinner-border").show();
+
     const response = await fetch('/drivers', {
       method: 'PUT',
       headers: {
@@ -141,6 +149,11 @@ async function updateInterestedCarpark(address, carParkNo) {
       body: JSON.stringify({ intent: "update_interested_carpark", carpark_address: address })
     });
     const data = await response.json();
+
+    interestedButton.find(".spinner-border").hide();
+    interestedButton.find(".disabled-label").hide();
+    interestedButton.find(".enabled-label").show();
+    interestedButton.prop('disabled', false);
 
     if (data.success) {
       window.geojsonData = data.updatedgeojsondata;
@@ -151,21 +164,31 @@ async function updateInterestedCarpark(address, carParkNo) {
 
       if (data.op_type == 1) { // User Clicked on "I'm interested" button.
         window.interestedCarparkNo = carParkNo;
-        $("#mapboxgl-popup-content-button").text("I'm no longer interested.");
-        var i = Number($("#mapboxgl-popup-content-interested").text());
-        i++;
-        $("#mapboxgl-popup-content-interested").text(i);
+        
+        // Change button to "Update"
+
         var newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo);
+
+        // Update button
+        interestedButton.find(".enabled-label").text("I'm no longer interested.");
+
+        // Then update the count - note that this is a lazy update i.e. just +1
+        // instead of retrieving live count from server
+        var i = Number(interestedContent.text());
+        i++;
+        interestedContent.text(i);
+        
+        // Update sidebar
         storedInterestedCarpark = {...newInterestedCarpark};
         updateInterestedCarparkUI();
         updateIHaveParkedButtonUI();
       } else { // User Clicked on "I'm no longer interested" button.
         window.interestedCarparkNo = null;
         storedInterestedCarpark = null;
-        $("#mapboxgl-popup-content-button").text("I'm interested.");
-        var i = Number($("#mapboxgl-popup-content-interested").text());
+        interestedButton.find(".enabled-label").text("I'm interested.");
+        var i = Number(interestedContent.text());
         i--;
-        $("#mapboxgl-popup-content-interested").text(i);
+        interestedContent.text(i);
         storedInterestedCarpark = null;
         updateInterestedCarparkUI();
         updateIHaveParkedButtonUI()
@@ -466,7 +489,9 @@ function centerMapUI(coordinates = null, radius = null) {
 async function initialSetupUI() {
   loadGeoJSONData();
   const newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo);
-  storedInterestedCarpark = {...newInterestedCarpark};
+  if (newInterestedCarpark !== null) {
+    storedInterestedCarpark = {...newInterestedCarpark};
+  }
   updateInterestedCarparkUI();
   updateIHaveParkedButtonUI();
 }
@@ -628,9 +653,12 @@ map.on("click", "carparks-layer", (e) => {
   if (window.hasVehicle) {
     let buttonHTML = `<button type="button"
                                onClick="updateInterestedCarpark('${address}','${carParkNo}')"
-                               class="btn btn-primary btn-sm"
+                               class="btn btn-primary btn-sm w-100"
                                id="mapboxgl-popup-content-button">
-                               ${interestedButtonText}
+                               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
+                               <span class="disabled-label" style="display: none;">Updating</span>
+                               <span class="enabled-label">${interestedButtonText}</span>
+                               
                       </button>`;
     desc = desc + buttonHTML;
   }
