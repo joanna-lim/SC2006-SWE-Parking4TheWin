@@ -46,7 +46,24 @@ def post_coe():
 
     vehicle =  Vehicle.query.filter_by(car_plate=car_plate).first()
     if vehicle:
-        flash('Vehicle with this car plate has already been registered!', category='error')
+        flash('Vehicle with this car plate has already been registered!', 'error')
+
+    elif len(full_name) < 1:
+        flash('Full name cannot be empty!', 'error')
+
+    # legal limit for full name in Singapore is 54
+    elif len(full_name) > 54:
+        flash('Full name is too long!', 'error')
+    
+    elif len('carPlate') < 1:
+        flash('Car plate cannot be empty!', 'error')
+    
+    elif len('carPLate') > 150:
+        flash('Car plate is too long!', 'error')
+    
+    elif len(str(coe_expiry_html)) < 1:
+        flash('COE expiry cannot be empty!', 'error')
+    
     else: 
         new_vehicle = Vehicle(full_name=full_name, car_plate=car_plate, coe_expiry=coe_expiry, user_id=current_user.id)
         db.session.add(new_vehicle) 
