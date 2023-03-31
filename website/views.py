@@ -110,7 +110,7 @@ def claim_reward():
     
     # since 1 point =  10 cents, drivers need to have (cost of reward)*10 points
     if driver.points >= reward.cost_of_reward*10 and reward.number_of_rewards > 0:
-        driver.points -= reward.cost_of_reward
+        driver.points -= (reward.cost_of_reward)*10
         new_claim = UserClaimedRewards(driver_user_id=current_user.id, reward_id=reward_id)
         db.session.add(driver)
         db.session.add(new_claim)
