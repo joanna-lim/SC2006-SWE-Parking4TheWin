@@ -113,7 +113,7 @@ content %}
       <div class="card mb-4">
         <div class="card-body">
           <h4 class="card-title" style="display: inline-block; margin-right: 10px;">{{ reward.reward_title }} </h4>
-          <span class="badge badge-info" style="font-size: 14px; display: inline-block;">{{ reward.cost_of_reward | round | int }} Points </span>
+          <span class="badge badge-info" style="font-size: 14px; display: inline-block;">{{ (reward.cost_of_reward*10) | round | int }} Points </span>
           {% for company in companies %}
           {% if reward.user_id == company.user_id %}
           <p class="card-text"><strong>Company: </strong>{{company.company_name}}</p>

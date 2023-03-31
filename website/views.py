@@ -108,7 +108,8 @@ def claim_reward():
     reward = Reward.query.get(reward_id)
     driver = Driver.query.filter_by(user_id=current_user.id).first()
     
-    if driver.points >= reward.cost_of_reward and reward.number_of_rewards > 0:
+    # since 1 point =  10 cents, drivers need to have (cost of reward)*10 points
+    if driver.points >= reward.cost_of_reward*10 and reward.number_of_rewards > 0:
         driver.points -= reward.cost_of_reward
         new_claim = UserClaimedRewards(driver_user_id=current_user.id, reward_id=reward_id)
         db.session.add(driver)
