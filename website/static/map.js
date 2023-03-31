@@ -90,22 +90,37 @@ async function findNearbyCarparks(coordinates, radiusInKm) {
 
   await waitTillTargetReady(isCarparksReady, 100);
 
-  // Return carparks in the Turf.js circle object
+  /*
+   * Note that the method that I used to find nearby carparks (map.querySourceFeatures)
+   * has some quirks. I think it depends on the `features` visible on the map.
+   * I can't change the way it works because its from mapbox API. 
+   */
+
+  // Find carparks in the Turf.js circle object
+  // This will not always succeed - sometimes return an empty list and sometimes
+  // return duplicate entries.
   carparks = map.querySourceFeatures('carparks-data', {
     sourceLayer: 'carparks-layer',
     filter: ['within', circle],
   });
 
-  // map.querySourceFeatures returns an empty list sometimes
-  // This is a band-aid solution.
+  // This is a band-aid solution to the empty list problem.
   while (carparks === null || carparks.length === 0) {
     // wait 1 second before retrying
     await new Promise(resolve => setTimeout(resolve, 1000));
+
     carparks = map.querySourceFeatures('carparks-data', {
       sourceLayer: 'carparks-layer',
       filter: ['within', circle],
     });
   }
+
+  // Remove duplicate entries
+  carparks = carparks.filter((value, index, self) =>
+    index === self.findIndex((t) => (
+      t.properties.car_park_no === value.properties.car_park_no
+    ))
+  )
 
   carparks.forEach((carpark) => {
     addDistanceToCarpark(coordinates, carpark);
