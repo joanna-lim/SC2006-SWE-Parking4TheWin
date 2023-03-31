@@ -32,6 +32,10 @@ def post_driver_login():
     email = request.form.get('email')
     password = request.form.get('password')
 
+    if len(email) > 150 or len(password) > 150:
+        flash('Input is too long!', 'error')
+        return get_driver_login
+    
     driver = Driver.query.filter_by(email=email).first()
 
     if driver:
@@ -55,6 +59,10 @@ def post_corporate_login():
     uen = request.form.get('uen')
     password = request.form.get('password')
 
+    if len(uen) > 150 or len(password) > 150: 
+        flash('Input is too long!', 'error')
+        return get_corporate_login()
+
     company = Company.query.filter_by(uen=uen).first()
 
     if company:
@@ -63,9 +71,9 @@ def post_corporate_login():
             login_user(company, remember=True)
             return redirect(url_for('views.home'))
         else:
-            flash('Wrong password! :(', category='error')
+            flash('Wrong password!', 'error')
     else:
-        flash('UEN doesn\'t exist!', category='error')
+        flash('UEN doesn\'t exist!', 'error')
 
     return get_corporate_login()
 
@@ -95,13 +103,28 @@ def post_driver_signup():
     """
 
     if driver:
-        flash('An account has already been created with this email!', category='error')
+        flash('An account has already been created with this email!', 'error')
+    
+    elif len(email)<1:
+        flash('Email cannot be empty!', 'error')
+    
+    elif len(email) > 150:
+        flash('Email is too long!', 'error')
+    
+    elif len(first_name) < 1:
+        flash('Name cannot be empty!')
+    
+    elif len(first_name) > 150:
+        flash('Name is too long!', 'error')
+    
+    elif len(password1) > 150:
+        flash('Password is too long!', 'error')
     
     elif len(password1) < 8:
-        flash('Password should be at least 8 characters!', category='error')
+        flash('Password should be at least 8 characters!', 'error')
         
     elif password1!=password2:
-        flash('Passwords don\'t match :(', category='error')
+        flash('Passwords don\'t match!', 'error')
         
     else:
         # add user to database
@@ -136,13 +159,28 @@ def post_corporate_sign_up():
     """
 
     if company:
-        flash('An account has already been created with this UEN!', category='error')
+        flash('An account has already been created with this UEN!', 'error')
+    
+    elif len(uen) < 1:
+        flash('UEN cannot be empty!', 'error')
+    
+    elif len(uen) > 150:
+        flash('UEN is too long!', 'error')
+    
+    elif len(company_name) < 1:
+        flash('Company name cannot be empty!', 'error')
+
+    elif len(company_name) > 150:
+        flash('Company name is too long!', 'error')
+    
+    elif len(password1) >150:
+        flash('Password is too long!')
     
     elif len(password1) < 8:
-        flash('Password should be at least 8 characters!', category='error')
+        flash('Password should be at least 8 characters!', 'error')
         
     elif password1!=password2:
-        flash('Passwords don\'t match :(', category='error')
+        flash('Passwords don\'t match!', 'error')
         
     else:
         # add user to database
@@ -154,7 +192,7 @@ def post_corporate_sign_up():
         db.session.add(new_company)
         db.session.commit()
         
-        flash('Account created! :)', category='success')
+        flash('Corporate Account successfully created!', 'success')
         return redirect(url_for('views.home'))
         
     return get_corporate_sign_up()

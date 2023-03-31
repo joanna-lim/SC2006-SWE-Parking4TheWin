@@ -160,6 +160,9 @@ def post_rewards_creation():
     number_of_rewards = request.form.get('numberOfRewards')
     cost_of_reward = request.form.get('costOfReward')
     reward_expiry = datetime.strptime(reward_expiry_html, '%Y-%m-%d').date()
+
+    if len(reward_title) > 3:
+        pass
     new_reward = Reward(reward_title=reward_title, reward_expiry=reward_expiry, reward_details=reward_details, user_id= current_user.id, reward_category=reward_category, number_of_rewards=number_of_rewards, cost_of_reward=cost_of_reward)
     db.session.add(new_reward) 
     db.session.commit()
