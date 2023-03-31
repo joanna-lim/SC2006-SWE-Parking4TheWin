@@ -161,12 +161,35 @@ def post_rewards_creation():
     cost_of_reward = request.form.get('costOfReward')
     reward_expiry = datetime.strptime(reward_expiry_html, '%Y-%m-%d').date()
 
-    if len(reward_title) > 3:
-        pass
-    new_reward = Reward(reward_title=reward_title, reward_expiry=reward_expiry, reward_details=reward_details, user_id= current_user.id, reward_category=reward_category, number_of_rewards=number_of_rewards, cost_of_reward=cost_of_reward)
-    db.session.add(new_reward) 
-    db.session.commit()
-    flash('Reward created!', category='success')
+    if len(reward_title) > 150: 
+        flash('Reward title too long!', 'error')
+    
+    elif len(reward_title) < 1:
+        flash('Reward title cannot be empty!', 'error')
+    
+    elif len(str(reward_expiry_html)) < 1:
+        flash('Expiry date cannot be empty!', 'error')
+    
+    elif len(str(number_of_rewards)) < 1:
+        flash('Number of Rewards cannot be empty!', 'error') 
+    
+    elif int(number_of_rewards) > 100000:
+        flash('Number of rewards is too high!', 'error')
+    
+    elif len(str(cost_of_reward)) < 1:
+        flash('Cost of reward cannot be empty!', 'error')
+    
+    elif len(reward_details) > 10000:
+        flash('Details are too long! Max 10,000 characters', 'error')
+    
+    elif int(cost_of_reward) > 1000000:
+        flash('Cost of reward is too high!', 'error')
+    
+    else: 
+        new_reward = Reward(reward_title=reward_title, reward_expiry=reward_expiry, reward_details=reward_details, user_id= current_user.id, reward_category=reward_category, number_of_rewards=number_of_rewards, cost_of_reward=cost_of_reward)
+        db.session.add(new_reward) 
+        db.session.commit()
+        flash('Reward created!', category='success')
 
     return get_rewards_creation()
 
