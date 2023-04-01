@@ -35,9 +35,6 @@
     {% block headcontent %} {% endblock %}
     <title>{% block title %}Home{% endblock %}</title>
     <style>
-      /* :root {
-        --navbar-min-height: 70px;  Need this for map positioning. 
-      } */
 
       .popup-btn {
         position: absolute;
@@ -55,8 +52,8 @@
         width: 35px;
         height: 35px;
         border-radius: 10%;
-        background-color: #fff;
-        border: 2px solid #000000;
+        background-color: #72a0c1;
+        border: 2px solid #b3ccde;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         position: relative;
       }
@@ -66,7 +63,7 @@
         width: 25px;
         height: 3px;
         margin: 5px auto;
-        background-color: #000;
+        background-color: #b3ccde;
         border-radius: 3px;
       }
 
@@ -74,20 +71,33 @@
         position: absolute;
         top: 50px;
         right: 10px;
-        background-color: #fff;
-        border: 1px solid #ccc;
+        background-color: #72a0c1;
+        border: 3px solid #b3ccde;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         display: none;
         z-index: 999;
+        border-radius: 10px;
+        padding: 10px;
       }
 
       .navbar.show {
         display: block;
       }
+
+      .navbar a.nav-link {
+        color: #b3ccde;
+        transition: color 0.2s ease-in-out;
+        }
+
+    .navbar a.nav-link:hover {
+        color: #fff;
+        }
+
+
     </style>
   </head>
   <body>
-    <nav class="navbar">
+    <nav class="navbar" id="navbar">
       <ul class="navbar-nav">
         {% if user.is_authenticated and user.user_type=="driver"%}
         <a class="nav-item nav-link" id="carparks" href="/">carparks</a>
