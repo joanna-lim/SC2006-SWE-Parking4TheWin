@@ -2,196 +2,189 @@
 {% block title %} Home {% endblock %}
 
 {% block headcontent %}
-  <script defer src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-  <link
-    href="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css"
-    rel="stylesheet"
-  />
-  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Roboto', sans-serif;
-    }
+<script defer src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+  }
 
-        #map {
-          width: 100%;
-          z-index: 1;
-        }
+  #map {
+    width: 100%;
+    z-index: 1;
+  }
 
-        .mapboxgl-popup {
-          max-width: 200px;
-          font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
-        }
-  
-        #search-form {
-          margin: 5%;
-        } 
-        /* for some reason input range extrudes from the sidebar 
-           this is the fix*/
-        input[type="range"] {
-          width: 90%;
-        } 
-  
-        #search-form label {
-          font-size: 14px;
-          margin-bottom: 5px;
-        }
-  
-        #search-form input {
-          font-size: 14px;
-          padding: 8px 10px;
-          border-radius: 3px;
-          border: 1px solid #ddd;
-          margin-bottom: 10px;
-        }
-  
-        #search-form button {
-          font-size: 14px;
-          padding: 8px 20px;
-          /* background-color: #007bff; */
-          color: #fff;
-          border: none;
-          border-radius: 3px;
-          transition: background-color 0.2s ease-in-out;
-        }
+  .mapboxgl-popup {
+    max-width: 200px;
+    font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+
+  #search-form {
+    margin: 5%;
+  }
+
+  #search-form label {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  #search-form input {
+    font-size: 14px;
+    padding: 8px 10px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+  }
+
+  #search-form button {
+    font-size: 14px;
+    padding: 8px 20px;
+    /* background-color: #007bff; */
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    transition: background-color 0.2s ease-in-out;
+  }
+
   /* 
         #search-form button:hover {
           background-color: #0069d9;
         } */
-  
-        #custom-sidebar {
-          background-color: #f5f5f5;
-          padding: 20px;
-          box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
-        }
-  
-        .radius-wrapper {
-            display: flex;
-            align-items: center;
-          }
-        .radius-wrapper label {
-          margin-right: 10px;
-        }
 
-        .sort-unfocused {
-          opacity: 0.5;
-        }
-      </style>
+  #custom-sidebar {
+    background-color: #f5f5f5;
+    width: 300px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .radius-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  .radius-wrapper label {
+    margin-right: 10px;
+  }
+
+  .sort-unfocused {
+    opacity: 0.5;
+  }
+
+  #sidebar-toggle-button {
+    position: absolute;
+    z-index: 2;
+    margin-top: 10px;
+  }
+
+  /* Apply using js to sidebar-toggle-button when the sidebar
+     is expanded. */
+  .sidebar-toggle-button-expanded {
+    left: 310px;
+    z-index: 2;
+  }
+</style>
 {% endblock %}
 
 {% block content%}
-
-<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Settings</button>
-
-<div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Settings</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-
-    <div>
-      <form id="search-form">
-        <div class="form-group">
-          <label for="location-input col-form-label-sm">Location</label>
-          <input type="text" class="form-control form-control-sm" id="location-input">
-        </div>
-        <div class="form-group">
-          <div class="radius-wrapper">
-            <label for="radius-input col-form-label-sm">Radius
-              <span class="badge badge-info" id="radius-label"><!-- radius label --></span>
-            </label>
-            <input type="range" min="1" max="10" step="0.1" id="radius-input">
+<div class="container-fluid" style="height: 100vh">
+  <button class="btn btn-primary rounded-circle p-2 sidebar-toggle-button-expanded" id="sidebar-toggle-button">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="sidebar-expand-icon"
+      style="width:20px; height: 20px; display: none;">
+      <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+      <path fill="#FFFFFF"
+        d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z" />
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="sidebar-collapse-icon"
+      style="width:20px; height: 20px;">
+      <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+      <path fill="#FFFFFF"
+        d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z" />
+  </button>
+  <div class="row h-100">
+    <div id="custom-sidebar">
+      <div>
+        <form id="search-form">
+          <div class="form-group">
+            <label for="location-input col-form-label-sm">Location</label>
+            <input type="text" class="form-control form-control-sm" id="location-input">
           </div>
-        </div>
-        <div class="row justify-content-center">             
-          <button type="submit" class="btn btn-primary">
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
-            <span class="disabled-label" style="display: none;">Searching...</span>
-            <span class="enabled-label">Search Carparks</span>
-          </button> 
-        </div>
-      </form>
+          <div class="form-group">
+            <div class="radius-wrapper">
+              <label for="radius-input col-form-label-sm">Radius
+                <span class="badge badge-info" id="radius-label"><!-- radius label --></span>
+              </label>
+              <input type="range" min="1" max="10" step="0.1" id="radius-input">
+            </div>
+          </div>
+          <div class="row justify-content-center">
+            <button type="submit" class="btn btn-primary">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+                style="display:none;"></span>
+              <span class="disabled-label" style="display: none;">Searching...</span>
+              <span class="enabled-label">Search Carparks</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      <div>
+        <ul class="list-group list-group-flush" style="height: 55vh; overflow-y:auto;" id="nearby-carparks-list">
+          <!-- To be filled with Interested Carpark and nearby carparks -->
+        </ul>
+      </div>
+      <div class="d-flex justify-content-around m-2">
+        <button class="btn btn-secondary btn-sm rounded-top" style="width: 40%; display: none;"
+          id="vacancy-sort-button">
+          <svg class="sort-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px;">
+            <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+            <path fill="#FFFFFF"
+              d="M182.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-9.2 9.2-11.9 22.9-6.9 34.9s16.6 19.8 29.6 19.8H288c12.9 0 24.6-7.8 29.6-19.8s2.2-25.7-6.9-34.9l-128-128z" />
+          </svg>
+          <svg class="sort-down" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"
+            style="width: 10px; display: none;">
+            <!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) -->
+            <path fill="#FFFFFF"
+              d="M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z" />
+          </svg>
+          Vacancy
+        </button>
+        <button class="btn btn-success btn-sm rounded-top" style="width: 40%; display: none" id="distance-sort-button">
+          <svg class="sort-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px;">
+            <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+            <path fill="#FFFFFF"
+              d="M182.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-9.2 9.2-11.9 22.9-6.9 34.9s16.6 19.8 29.6 19.8H288c12.9 0 24.6-7.8 29.6-19.8s2.2-25.7-6.9-34.9l-128-128z" />
+          </svg>
+          <svg class="sort-down" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"
+            style="width: 10px; display: none;">
+            <!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) -->
+            <path fill="#FFFFFF"
+              d="M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z" />
+          </svg>
+          Distance
+        </button>
+      </div>
+      <div class="row justify-content-center m-1" style="max-height: 5vh;">
+        <a draggable="false" href="/parking_verification" class="btn btn-primary" style="display: none;"
+          id="i-have-parked-btn">I have parked</a>
+      </div>
     </div>
-
-
-
-
-    <div>
-      <ul class="list-group list-group-flush" style="height: 50vh; overflow-y:auto;" id="nearby-carparks-list">
-        <!-- To be filled with Interested Carpark and nearby carparks -->
-      </ul>
+    <div class="col" id="map">
+      <!-- This is for the Mapbox GL map, to be loaded using scripts. -->
     </div>
-
-
-    <div class="row justify-content-center m-1" style="max-height: 5vh;">
-      <a draggable="false" href="/parking_verification" class="btn btn-primary" style="display: none;" id="i-have-parked-btn">I have parked</a>
-    </div>
-
-
-
   </div>
 </div>
-
-
-
-
-
-
-
-      <div class="container-fluid">
-    <div class="row h-100" >  
-      <div class="col-2 p-2">
-
-        <div>
-          <ul class="list-group list-group-flush" style="height: 50vh; overflow-y:auto;" id="nearby-carparks-list">
-            <!-- To be filled with Interested Carpark and nearby carparks -->
-          </ul>
-        </div>
-        <div class="d-flex justify-content-around m-2">
-          <button class="btn btn-secondary btn-sm rounded-top" style="width: 40%; display: none;" id="vacancy-sort-button">
-            <svg class="sort-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px;">
-              <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
-              <path fill="#FFFFFF" d="M182.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-9.2 9.2-11.9 22.9-6.9 34.9s16.6 19.8 29.6 19.8H288c12.9 0 24.6-7.8 29.6-19.8s2.2-25.7-6.9-34.9l-128-128z"/>
-            </svg>
-            <svg class="sort-down" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px; display: none;">
-              <!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) -->
-              <path fill="#FFFFFF" d="M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z"/>
-            </svg>
-            Vacancy
-          </button>
-          <button class="btn btn-success btn-sm rounded-top" style="width: 40%; display: none" id="distance-sort-button">
-            <svg class="sort-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px;">
-              <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
-              <path fill="#FFFFFF" d="M182.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-9.2 9.2-11.9 22.9-6.9 34.9s16.6 19.8 29.6 19.8H288c12.9 0 24.6-7.8 29.6-19.8s2.2-25.7-6.9-34.9l-128-128z"/>
-            </svg>
-            <svg class="sort-down" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px; display: none;">
-              <!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) -->
-              <path fill="#FFFFFF" d="M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z"/>
-            </svg>
-            Distance
-          </button>
-        </div>
-        <div class="row justify-content-center m-1" style="max-height: 5vh;">
-          <a draggable="false" href="/parking_verification" class="btn btn-primary" style="display: none;" id="i-have-parked-btn">I have parked</a>
-        </div>
-      </div>
-      <div class="col" id="map">
-        <!-- This is for the Mapbox GL map, to be loaded using scripts. -->
-      </div>
-    </div>
-  </div>
-  <div class="position-absolute bottom-0 end-0 mb-4 me-4">
-    <button class="btn btn-primary rounded-circle p-2" id="get-user-location-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:25px;">
-        <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
-        <path fill="#FFFFFF" d="M256 0c17.7 0 32 14.3 32 32V66.7C368.4 80.1 431.9 143.6 445.3 224H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H445.3C431.9 368.4 368.4 431.9 288 445.3V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V445.3C143.6 431.9 80.1 368.4 66.7 288H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H66.7C80.1 143.6 143.6 80.1 224 66.7V32c0-17.7 14.3-32 32-32zM128 256a128 128 0 1 0 256 0 128 128 0 1 0 -256 0zm128-80a80 80 0 1 1 0 160 80 80 0 1 1 0-160z"/>
-      </svg>
-    </button>
-  </div>
+<div class="position-absolute bottom-0 end-0 mb-4 me-4" style="z-index: 999;">
+  <button class="btn btn-primary rounded-circle p-2" id="get-user-location-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:25px;">
+      <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+      <path fill="#FFFFFF"
+        d="M256 0c17.7 0 32 14.3 32 32V66.7C368.4 80.1 431.9 143.6 445.3 224H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H445.3C431.9 368.4 368.4 431.9 288 445.3V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V445.3C143.6 431.9 80.1 368.4 66.7 288H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H66.7C80.1 143.6 143.6 80.1 224 66.7V32c0-17.7 14.3-32 32-32zM128 256a128 128 0 1 0 256 0 128 128 0 1 0 -256 0zm128-80a80 80 0 1 1 0 160 80 80 0 1 1 0-160z" />
+    </svg>
+  </button>
+</div>
 </div>
 {% endblock %}
 
@@ -199,7 +192,7 @@
 <script defer>
   var MAPBOX_SECRET_KEY = '{{ MAPBOX_SECRET_KEY }}';
   var interestedCarparkNo = '{{ interested_carpark }}';
-  var hasVehicle = {{ has_vehicle|lower }};
+  var hasVehicle = {{ has_vehicle| lower }};
 </script>
 <script defer src="static/map.js"></script>
 {% endblock %}

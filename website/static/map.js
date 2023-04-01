@@ -51,7 +51,7 @@ async function findCarparkFromNo(carparkNo) {
   await waitTillTargetReady(() => geojsonData, 100);
 
   for (let carpark of geojsonData.features) {
-    if(carpark.properties.car_park_no === carparkNo) {
+    if (carpark.properties.car_park_no === carparkNo) {
       return carpark;
     }
   }
@@ -63,9 +63,9 @@ async function findCarparkFromNo(carparkNo) {
 function addDistanceToCarpark(coordinates, carpark) {
   const carparkCoordinate = carpark.geometry.coordinates;
   const distanceInKM = turf.distance(turf.point(coordinates),
-                            turf.point(carparkCoordinate),
-                            { units: 'kilometers' })
-                            .toFixed(1);
+    turf.point(carparkCoordinate),
+    { units: 'kilometers' })
+    .toFixed(1);
   carpark.properties.distanceInKM = parseFloat(distanceInKM);
 }
 
@@ -80,20 +80,20 @@ function isMapLoaded() {
 
 // wait untill some target is ready
 async function waitTillTargetReady(isTargetReady, milliseconds) {
-    while (!isTargetReady()) {
-      // wait 1 second before retrying
-      await new Promise(resolve => setTimeout(resolve, milliseconds));
-    }
+  while (!isTargetReady()) {
+    // wait 1 second before retrying
+    await new Promise(resolve => setTimeout(resolve, milliseconds));
+  }
 }
 
 // Get directions from one point to another using mapbox directions API
 async function getRoute(fromCoordinates, toCoordinates) {
   try {
     var apiUrl = 'https://api.mapbox.com/directions/v5/mapbox/driving/' +
-                    fromCoordinates[0] + ',' + fromCoordinates[1] + ';' + 
-                    toCoordinates[0] + ',' + toCoordinates[1] +
-                    '?access_token=' + mapboxgl.accessToken +
-                    '&geometries=geojson';
+      fromCoordinates[0] + ',' + fromCoordinates[1] + ';' +
+      toCoordinates[0] + ',' + toCoordinates[1] +
+      '?access_token=' + mapboxgl.accessToken +
+      '&geometries=geojson';
 
     //https://api.mapbox.com/directions/v5/mapbox/driving/13.43,52.51;13.42,52.5;13.41,52.5?radiuses=40;;100&geometries=polyline6&access_token=pk.eyJ1IjoibWs0M3YzciIsImEiOiJjbGVzZHNxM28wNnE3M3RwZHhzZXp2dWR1In0._gNdJ2q7jhgHBYXIN5-Q9g
 
@@ -110,20 +110,20 @@ function updateUserLocationUI() {
   if (userMarker !== null) {
     userMarker.remove();
   }
-    
-  userMarker = new mapboxgl.Marker({color: "blue"})
-      .setLngLat(storedUserLocation)
-      .setPopup(new mapboxgl.Popup().setHTML('You are here.'))
-      .addTo(map);
+
+  userMarker = new mapboxgl.Marker({ color: "blue" })
+    .setLngLat(storedUserLocation)
+    .setPopup(new mapboxgl.Popup().setHTML('You are here.'))
+    .addTo(map);
 }
 
 // This will prompt the user for their location and then update the marker
 // and routes
 async function getUserLocation() {
   // check if geolocation permission is granted
-  navigator.permissions.query({name:'geolocation'}).then(async function(permissionStatus) {
+  navigator.permissions.query({ name: 'geolocation' }).then(async function (permissionStatus) {
     if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') {
-      navigator.geolocation.getCurrentPosition(async function(position) {
+      navigator.geolocation.getCurrentPosition(async function (position) {
         const { latitude, longitude } = position.coords;
 
         storedUserLocation = [longitude, latitude];
@@ -131,7 +131,7 @@ async function getUserLocation() {
         updateUserLocationUI();
         centerMapUI(storedUserLocation);
 
-      }, async function(error) {
+      }, async function (error) {
         // use the center of map as user location if permission is denied.
         const centerOfMap = map.getCenter();
         storedUserLocation = [centerOfMap.lng, centerOfMap.lat];
@@ -228,7 +228,7 @@ async function updateInterestedCarpark(address, carParkNo) {
 
       if (data.op_type == 1) { // User Clicked on "I'm interested" button.
         window.interestedCarparkNo = carParkNo;
-        
+
         // Change button to "Update"
 
         var newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo);
@@ -241,7 +241,7 @@ async function updateInterestedCarpark(address, carParkNo) {
         var i = Number(interestedContent.text());
         i++;
         interestedContent.text(i);
-        storedInterestedCarpark = {...newInterestedCarpark};
+        storedInterestedCarpark = { ...newInterestedCarpark };
       } else { // User Clicked on "I'm no longer interested" button.
         window.interestedCarparkNo = null;
         storedInterestedCarpark = null;
@@ -287,11 +287,11 @@ function sortStoredNearbyCarparks() {
   } else {
     if (sortOrder === "asc") {
       storedNearbyCarparks.sort((a, b) => {
-        return a.properties.vacancy_percentage- b.properties.vacancy_percentage;
+        return a.properties.vacancy_percentage - b.properties.vacancy_percentage;
       });
     } else {
       storedNearbyCarparks.sort((a, b) => {
-        return b.properties.vacancy_percentage- a.properties.vacancy_percentage;
+        return b.properties.vacancy_percentage - a.properties.vacancy_percentage;
       });
     }
   }
@@ -312,7 +312,7 @@ async function search() {
     /* use mapbox geocoding api to turn search term into
     the closest matching physical location */
     const response = await fetch(geocodingurl);
-  
+
     const data = await response.json();
     var coordinates = data.features[0].center;
     const radiusInKm = parseFloat(radiusInput.value);
@@ -340,7 +340,7 @@ async function search() {
 // fetch GeoJSONData from "/carparks" url
 async function fetchGeoJSONData() {
   const response = await fetch("/carparks", {
-    method : "GET"
+    method: "GET"
   });
   geojsonData = await response.json();
 }
@@ -432,7 +432,7 @@ function updateNearbyCarparksListUI() {
   updateInterestedCarparkUI();
 
   storedNearbyCarparks.forEach((carpark) => {
-    
+
     const coordinates = carpark.geometry.coordinates;
     const properties = carpark.properties;
 
@@ -440,19 +440,19 @@ function updateNearbyCarparksListUI() {
     if (properties.car_park_no === window.interestedCarparkNo) {
       return;
     }
-    
+
     const address = properties.address;
     const vacancyPercentage = properties.vacancy_percentage;
     const distanceInKM = properties.distanceInKM;
 
     nearbyCarparksList.append(createCarparksListItemUI(carpark, false, "nearby-carpark-list-item-" + properties.car_park_no));
-  });  
+  });
 }
 
 // Update interested carpark UI with value in storedInterestedCarpark
 function updateInterestedCarparkUI() {
   const nearbyCarparksList = $("#nearby-carparks-list");
-  
+
   if (storedInterestedCarpark === null) {
     $('#interested-carpark-list-item').remove();
     return;
@@ -460,9 +460,9 @@ function updateInterestedCarparkUI() {
 
   newInterestCarparkItem = createCarparksListItemUI(storedInterestedCarpark, true, "interested-carpark-list-item");
 
-  if($('#interested-carpark-list-item').length){ // this tests if interested carpark list item exists
+  if ($('#interested-carpark-list-item').length) { // this tests if interested carpark list item exists
     $('#interested-carpark-list-item').replaceWith(newInterestCarparkItem);
-  }else{
+  } else {
     nearbyCarparksList.prepend(newInterestCarparkItem);
   }
 }
@@ -511,17 +511,17 @@ function placeSearchMarkerUI(coordinates, placeName) {
   // remove search marker if it exists already.
   if (searchMarker !== null) {
     searchMarker.remove();
-  } 
+  }
 
   // place a new search marker
   searchMarker = new mapboxgl.Marker()
-                      .setLngLat(coordinates)
-                      .setPopup(
-                        new mapboxgl.Popup({ offset: 25 }).setHTML(
-                          "<p><strong>Your Search: </strong>" + placeName + "</p>"
-                        )
-                      )
-                      .addTo(map);
+    .setLngLat(coordinates)
+    .setPopup(
+      new mapboxgl.Popup({ offset: 25 }).setHTML(
+        "<p><strong>Your Search: </strong>" + placeName + "</p>"
+      )
+    )
+    .addTo(map);
 }
 
 // Center map on the given coordinate and radius (in km)
@@ -539,14 +539,14 @@ function centerMapUI(coordinates = null, radius = null) {
 
   const radiusInDegrees = radius / 111.32;
   const bounds = new mapboxgl.LngLatBounds()
-  .extend([
-    coordinates[0] + radiusInDegrees,
-    coordinates[1] + radiusInDegrees,
-  ])
-  .extend([
-    coordinates[0] - radiusInDegrees,
-    coordinates[1] - radiusInDegrees,
-  ]);
+    .extend([
+      coordinates[0] + radiusInDegrees,
+      coordinates[1] + radiusInDegrees,
+    ])
+    .extend([
+      coordinates[0] - radiusInDegrees,
+      coordinates[1] - radiusInDegrees,
+    ]);
 
   map.fitBounds(bounds);
 }
@@ -558,7 +558,7 @@ async function removeRouteUI() {
   }
 
   if (map.getSource("route")) {
-      map.removeSource("route");
+    map.removeSource("route");
   }
 }
 
@@ -571,7 +571,7 @@ async function displayRouteUI(fromCoordinates, toCoordinates) {
     await waitTillTargetReady(() => {
       return isMapLoaded() && isCarparksReady();
     }, 100);
-    
+
     // remove old route
     await removeRouteUI();
 
@@ -600,7 +600,7 @@ async function displayRouteUI(fromCoordinates, toCoordinates) {
       }
     });
 
-  } catch(error) {
+  } catch (error) {
     console.error(error);
   }
 }
@@ -612,7 +612,7 @@ async function updateRouteUI() {
       return;
     }
 
-    toCoordinates = storedInterestedCarpark.geometry.coordinates ;
+    toCoordinates = storedInterestedCarpark.geometry.coordinates;
     await displayRouteUI(storedUserLocation, toCoordinates);
   } catch (error) {
     console.error(error);
@@ -628,7 +628,7 @@ async function initialSetupUI() {
   loadGeoJSONData();
   const newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo);
   if (newInterestedCarpark !== null) {
-    storedInterestedCarpark = {...newInterestedCarpark};
+    storedInterestedCarpark = { ...newInterestedCarpark };
   }
   updateInterestedCarparkUI();
   updateIHaveParkedButtonUI();
@@ -650,9 +650,9 @@ radiusInput.addEventListener("input", function () {
 });
 
 
-searchForm.addEventListener("submit", async function(event) {
+searchForm.addEventListener("submit", async function (event) {
   event.preventDefault();
-  
+
   const submitButton = searchForm.querySelector("button");
   const enabledLabel = submitButton.querySelector(".enabled-label");
   const disabledLabel = submitButton.querySelector(".disabled-label");
@@ -704,6 +704,27 @@ document.getElementById("vacancy-sort-button").addEventListener("click", () => {
   sortStoredNearbyCarparks();
   updateNearbyCarparksListUI();
   updateSortButtonsUI();
+});
+
+document.getElementById("sidebar-toggle-button").addEventListener("click", () => {
+  sidebar = $('#custom-sidebar');
+  sidebarToggleButton = $('#sidebar-toggle-button');
+  sidebarToggleButtonExpanIcon = sidebarToggleButton.find(".sidebar-expand-icon");
+  sidebarToggleButtonCollapseIcon = sidebarToggleButton.find(".sidebar-collapse-icon");
+
+  if (sidebar.is(':visible')) {
+    sidebar.hide();
+    sidebarToggleButton.removeClass('sidebar-toggle-button-expanded');
+    sidebarToggleButtonCollapseIcon.hide();
+    sidebarToggleButtonExpanIcon.show();
+    map.resize();
+  } else {
+    sidebarToggleButtonExpanIcon.hide();
+    sidebarToggleButtonCollapseIcon.show();
+    sidebarToggleButton.addClass('sidebar-toggle-button-expanded');
+    sidebar.show();
+    map.resize();
+  }
 });
 
 document.getElementById("get-user-location-btn").addEventListener("click", getUserLocation);
