@@ -343,38 +343,59 @@ async function fetchGeoJSONData() {
   geojsonData = await response.json();
 }
 
+
+
 // fetch GeoJSON and load it to the map as a layer if ready
 async function loadGeoJSONData() {
-  await fetchGeoJSONData();
-  await waitTillTargetReady(isMapLoaded, 100);
+  try {
+    await fetchGeoJSONData();
+    await waitTillTargetReady(isMapLoaded, 100);
 
-  map.addSource("carparks-data", {
-    type: "geojson",
-    data: window.geojsonData,
-  });
+    map.addSource("carparks-data", {
+      type: "geojson",
+      data: window.geojsonData,
+    });
 
-  // Add a layer containing pins using "carparks-data" source
-  map.addLayer({
-    id: "carparks-layer",
-    type: "circle",
-    source: "carparks-data",
-    paint: {
-      "circle-radius": 12,
-      "circle-color": [
-        "interpolate",
-        ["linear"],
-        ["get", "vacancy_percentage"],
-        0,
-        "red",
-        50,
-        "yellow",
-        100,
-        "green",
-      ],
-      "circle-opacity": 0.6,
-    },
-  });
+    const colorBlindColours = {
+      colour1: "#f69322",
+      colour2: "#0072b2",
+      colour3: "#4c4c4c",
+    };
+
+    const defaultColours = {
+      colour1: "red",
+      colour2: "yellow",
+      colour3: "green",
+    }; 
+
+    const shades = isColorBlindModeOn ? colorBlindColours : defaultColours;
+
+    // Add a layer containing pins using "carparks-data" source
+    map.addLayer({
+      id: "carparks-layer",
+      type: "circle",
+      source: "carparks-data",
+      paint: {
+        "circle-radius": 12,
+        "circle-color": [
+          "interpolate",
+          ["linear"],
+          ["get", "vacancy_percentage"],
+          0,
+          shades.colour1,
+          50,
+          shades.colour2,
+          100,
+          shades.colour3,
+        ],
+        "circle-opacity": 0.6,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+  }
 }
+
 
 // Creates and returns a carparks list item UI (button)
 // If `interested` is true, then the list item will be styled differently
