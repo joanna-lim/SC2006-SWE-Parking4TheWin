@@ -95,8 +95,6 @@ async function getRoute(fromCoordinates, toCoordinates) {
       '?access_token=' + mapboxgl.accessToken +
       '&geometries=geojson';
 
-    //https://api.mapbox.com/directions/v5/mapbox/driving/13.43,52.51;13.42,52.5;13.41,52.5?radiuses=40;;100&geometries=polyline6&access_token=pk.eyJ1IjoibWs0M3YzciIsImEiOiJjbGVzZHNxM28wNnE3M3RwZHhzZXp2dWR1In0._gNdJ2q7jhgHBYXIN5-Q9g
-
     response = await fetch(apiUrl);
     data = await response.json();
 
