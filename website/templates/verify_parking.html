@@ -3,6 +3,41 @@
 
 <br />
 
+<style>
+  .modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 50%;
+  text-align: center;
+  border-radius: 5px;
+}
+
+.close-btn {
+  margin-top: 10px;
+  padding: 5px 10px;
+  border: none;
+  background-color: #4CAF50;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+</style>
+
 <h3 align="center">Verify Parking</h3>
 <div class="container d-flex flex-column align-items-center">
   <form id="validation-form" enctype="multipart/form-data">
@@ -21,6 +56,7 @@
     </button>
   </form>
 </div>
+
 {% endblock %} 
 
 {% block bodyscripts %}
@@ -28,8 +64,13 @@
   const validForm = document.getElementById("validation-form");
   const imageUpload = document.getElementById("imageUpload");
   const imagePreview = document.getElementById("imagePreview");
-  const submitBtn = document.getElementById("submitBtn");
+  // const submitBtn = document.getElementById("submitBtn");
   const deleteBtn = document.getElementById("deleteBtn");
+  const submitBtn = document.getElementById("submitBtn");
+
+  submitBtn.addEventListener("click", () => {
+    alert("You've received one point!");
+  });
 
   imageUpload.addEventListener("change", function() {
     const file = this.files[0];
