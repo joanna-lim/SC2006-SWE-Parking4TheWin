@@ -4,7 +4,7 @@ from . import db
 from .auth import role_required
 from .models import *
 from .update_carparks import update_carparks_availability, generate_geojson
-from datetime import datetime
+from datetime import datetime, date
 import json
 import os
 
@@ -62,6 +62,9 @@ def post_coe():
     
     elif len(str(coe_expiry_html)) < 1:
         flash('COE expiry cannot be empty!', 'error')
+
+    elif datetime.strptime(coe_expiry_html, '%Y-%m-%d').date() < date.today():
+        flash('COE date input has expired!', 'error')
     
     else: 
         coe_expiry = datetime.strptime(coe_expiry_html, '%Y-%m-%d').date()
