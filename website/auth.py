@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
 from functools import wraps
+import re
 
 auth = Blueprint('auth', __name__)
 
@@ -89,6 +90,7 @@ def get_driver_signup():
 
 @auth.route('/signup/driver', methods=['POST'])
 def post_driver_signup():
+    pattern = r"^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
     email = request.form.get('email')
     first_name = request.form.get('firstName')
     password1 = request.form.get('password1')
@@ -101,6 +103,8 @@ def post_driver_signup():
     - unique email
     - password must be at least 8 characters
     """
+
+    print(re.match(pattern,password1))
 
     if driver:
         flash('An account has already been created with this email!', 'error')
@@ -115,7 +119,10 @@ def post_driver_signup():
         flash('Name cannot be empty!')
     
     elif len(first_name) > 150:
-        flash('Name is too long!', 'error')
+        flash('Name is too long!', 'error')    
+
+    elif not re.match(pattern, password1):
+        flash('Password should have at least 1 character, 1 digit and 1 special character!', 'error')
     
     elif len(password1) > 150:
         flash('Password is too long!', 'error')
@@ -145,6 +152,7 @@ def get_corporate_sign_up():
 
 @auth.route('/signup/corporate', methods=['POST'])
 def post_corporate_sign_up():
+    pattern = r"^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
     uen = request.form.get('uen')
     company_name = request.form.get('companyName')
     password1 = request.form.get('password1')
@@ -172,6 +180,9 @@ def post_corporate_sign_up():
 
     elif len(company_name) > 150:
         flash('Company name is too long!', 'error')
+
+    elif not re.match(pattern, password1):
+        flash('Password should have at least 1 character, 1 digit and 1 special character!', 'error')
     
     elif len(password1) >150:
         flash('Password is too long!')

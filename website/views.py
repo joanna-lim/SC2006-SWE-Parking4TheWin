@@ -291,7 +291,7 @@ def get_parking_verification():
     # interested carparks
     driver = Driver.query.filter_by(user_id = current_user.id).first()
     if driver.interested_carpark is None:
-        flash("You don't have any interested carpark!", "error")
+        #flash("You don't have any interested carpark!", "error")
         return redirect(url_for("views.get_map"))
 
     if request.method == "GET":
