@@ -93,7 +93,7 @@ async function getRoute(fromCoordinates, toCoordinates) {
       fromCoordinates[0] + ',' + fromCoordinates[1] + ';' +
       toCoordinates[0] + ',' + toCoordinates[1] +
       '?access_token=' + mapboxgl.accessToken +
-      '&geometries=geojson';
+      '&geometries=geojson&overview=full';
 
     response = await fetch(apiUrl);
     data = await response.json();
