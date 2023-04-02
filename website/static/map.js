@@ -295,10 +295,40 @@ function sortStoredNearbyCarparks() {
   }
 }
 
+// Display message on map which will timeout after a certain time
+// messageType is `X` where `alert-X` is a boostrap class for alerts.
+function displayMessageOnMap(message, messageType, timeout) {
+
+  // Generate random number which will be used to uniquely identify the message
+  const min = 1;
+  const max = 100;
+  const tag = Math.floor(Math.random() * (max - min + 1)) + min;
+
+
+  const alertMessage = $(`
+    <div class="alert alert-${messageType} alert-dismissable fade show ml-5 mr-5" role="alert" style="z-index: 3;" id="map-message-${messageType}-${tag}">
+      ${message}
+    </div>`
+  );
+
+  $("#map").append(alertMessage);
+
+
+  setTimeout(() => {
+    $(`#map-message-${messageType}-${tag}`).remove();
+  }, timeout);
+}
+
 // Search for a location first and then the nearby carparks
 // and update the nearby carpark lists
 async function search() {
   var location = locationInput.value;
+
+  if (locationInput.value.trim() === "") {
+    displayMessageOnMap("You must enter a valid search location.", "warning", 2000);
+    return null;
+  }
+
   var geocodingurl =
     "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
     encodeURIComponent(location) +
@@ -312,6 +342,12 @@ async function search() {
     const response = await fetch(geocodingurl);
 
     const data = await response.json();
+
+    if (data.features.length === 0) {
+      displayMessageOnMap("You have entered an invalid location or we were unable to find your location. Please try again.", "warning", 2000);
+      return null;
+    }
+
     var coordinates = data.features[0].center;
     const radiusInKm = parseFloat(radiusInput.value);
 
@@ -366,7 +402,7 @@ async function loadGeoJSONData() {
       colour1: "red",
       colour2: "yellow",
       colour3: "green",
-    }; 
+    };
 
     const shades = isColorBlindModeOn ? colorBlindColours : defaultColours;
 
