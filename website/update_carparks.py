@@ -1,6 +1,7 @@
 import json
 import pyproj
 import urllib.request
+import random
 
 # (x, y) is also known as (easting, northing)
 def svy21_to_wgs84(x, y):
@@ -89,7 +90,7 @@ def update_carparks():
                 lots_available = None,
                 lot_type = None,
                 lot_info_last_updated = None,
-                no_of_interested_drivers = 0
+                no_of_interested_drivers = random.randint(0,50)
             )
             db.session.add(carpark)
     
