@@ -1,6 +1,5 @@
 __pycache__/
 venv/
 .env
-*instance/database.db
 .DS_Store
 website/carparks.json

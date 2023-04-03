@@ -92,7 +92,27 @@
     .navbar a.nav-link:hover {
         color: #fff;
         }
+      
+        .alert {
+        position: fixed;
+        top:20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+      }
 
+      .alert-success {
+    color: darkblue;
+    background-color: lightblue;
+    border-color: lightblue;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+
+  .alert-success > button.close {
+    color: darkblue;
+  }
 
     </style>
   </head>
@@ -124,9 +144,31 @@
         <span class="line"></span>
       </span>
     </button>
-
-    {% block content %} {%
-    endblock %}
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        {% if category == 'error' %}
+          <div class="alert alert-danger alert-dismissable fade show col-md-4 mt-5 mb-0" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% else %}
+          <div class="alert alert-success alert-dismissable fade show col-md-4 mt-5 mb-0" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% endwith %}
+    
+    {% block content %} {% endblock %}
+    
 
     <script>
       const popupBtn = document.querySelector(".popup-btn");
