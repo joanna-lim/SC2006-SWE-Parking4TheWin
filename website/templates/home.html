@@ -214,13 +214,6 @@
   var hasVehicle = {{ has_vehicle| lower }};
   var isColorBlindModeOn = false;
   const colorBlindModeBtn = document.getElementById("color-blind-mode-btn");
-
-  colorBlindModeBtn.addEventListener("click", function () {
-    isColorBlindModeOn = !isColorBlindModeOn;
-    map.removeLayer("carparks-layer");
-    map.removeSource("carparks-data");
-    loadGeoJSONData();
-  });
 </script>
-<script defer src="static/map.js"></script>
+<script defer type="module" src="static/home.js"></script>
 {% endblock %}
