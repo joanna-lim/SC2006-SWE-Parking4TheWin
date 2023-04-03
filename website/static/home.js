@@ -199,8 +199,8 @@ async function findNearbyCarparks(coordinates, radiusInKm) {
 // and then the popup info
 async function updateInterestedCarpark(address, carParkNo) {
   try {
-    interestedButton = $("#mapboxgl-popup-content-button");
-    interestedContent = $("#mapboxgl-popup-content-interested"); // text containing the # of interested drivers
+    const interestedButton = $("#mapboxgl-popup-content-button");
+    const interestedContent = $("#mapboxgl-popup-content-interested"); // text containing the # of interested drivers
 
     interestedButton.prop('disabled', true);
     interestedButton.find(".enabled-label").hide();
@@ -607,7 +607,6 @@ function centerMapUI(coordinates = null, radius = null) {
 
 // Ensure that the route is removed, if there is any
 async function removeRouteUI() {
-  console.log(">>><<<<", map);
   if (map.getLayer("route")) {
     map.removeLayer("route");
   }
@@ -790,7 +789,7 @@ colorBlindModeBtn.addEventListener("click", function () {
     map.removeSource("carparks-data");
     loadGeoJSONData();
   });
-  
+
 // Display popup containing carpark information when clicking on a pin
 map.on("click", "carparks-layer", (e) => {
   // Remove any exisiting popups
@@ -881,7 +880,6 @@ map.on("click", "carparks-layer", (e) => {
 
   if (window.hasVehicle) {
     let buttonHTML = `<button type="button"
-                               onClick="updateInterestedCarpark('${address}','${carParkNo}')"
                                class="btn btn-primary btn-sm w-100"
                                id="mapboxgl-popup-content-button">
                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
@@ -893,6 +891,7 @@ map.on("click", "carparks-layer", (e) => {
   }
 
   new mapboxgl.Popup().setLngLat(coordinates).setHTML(desc).addTo(map);
+  $("#mapboxgl-popup-content-button").click(() => updateInterestedCarpark(address, carParkNo));
 });
 
 // Increase opacity of pins when zooming in and
