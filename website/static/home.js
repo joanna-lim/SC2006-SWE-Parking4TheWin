@@ -11,6 +11,11 @@
     Mapbox
     UI Elements
 */
+import { isMapReady, isCarparksReady, displayMessageOnMap } from "./map.js";
+import { updateIHaveParkedButtonUI } from "./sidebar.js";
+import { findCarparkFromNo } from "./carpark.js";
+import { waitTillTargetReady } from "./helper.js";
+
 mapboxgl.accessToken = window.MAPBOX_SECRET_KEY;
 
 var geojsonData = null;
@@ -42,21 +47,6 @@ var userMarker = null;
 // Ensure that it is null
 interestedCarparkNo = interestedCarparkNo === "None" ? null : interestedCarparkNo;
 
-async function findCarparkFromNo(carparkNo) {
-  if (!carparkNo) {
-    return null;
-  }
-
-  await waitTillTargetReady(() => geojsonData, 100);
-
-  for (let carpark of geojsonData.features) {
-    if (carpark.properties.car_park_no === carparkNo) {
-      return carpark;
-    }
-  }
-  return null;    // this shouldn't happen
-}
-
 // For a carpark object, find the distance of the carpark from the given center coordinate
 // and add it to the carpark object
 function addDistanceToCarpark(coordinates, carpark) {
@@ -66,23 +56,6 @@ function addDistanceToCarpark(coordinates, carpark) {
     { units: 'kilometers' })
     .toFixed(1);
   carpark.properties.distanceInKM = parseFloat(distanceInKM);
-}
-
-// Determines if "carparks-data" and "carparks-layer" are ready
-function isCarparksReady() {
-  return map && map.getSource('carparks-data') && map.getLayer('carparks-layer');
-}
-
-function isMapLoaded() {
-  return map && map.loaded();
-}
-
-// wait untill some target is ready
-async function waitTillTargetReady(isTargetReady, milliseconds) {
-  while (!isTargetReady()) {
-    // wait 1 second before retrying
-    await new Promise(resolve => setTimeout(resolve, milliseconds));
-  }
 }
 
 // Get directions from one point to another using mapbox directions API
@@ -154,7 +127,7 @@ async function findNearbyCarparks(coordinates, radiusInKm) {
   const circle = turf.circle(coordinates, radiusInKm, options);
   var carparks = null;
 
-  await waitTillTargetReady(isCarparksReady, 100);
+  await waitTillTargetReady(() => isCarparksReady(map), 100);
 
   /*
    * Note that the method that I used to find nearby carparks (map.querySourceFeatures)
@@ -228,7 +201,7 @@ async function updateInterestedCarpark(address, carParkNo) {
 
         // Change button to "Update"
 
-        var newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo);
+        var newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo, geojsonData);
 
         // Update button
         interestedButton.find(".enabled-label").text("I'm no longer interested.");
@@ -251,7 +224,7 @@ async function updateInterestedCarpark(address, carParkNo) {
     }
     // Update side
     updateInterestedCarparkUI();
-    updateIHaveParkedButtonUI()
+    updateIHaveParkedButtonUI(storedInterestedCarpark);
     // Update route
     await updateRouteUI();
 
@@ -292,30 +265,6 @@ function sortStoredNearbyCarparks() {
       });
     }
   }
-}
-
-// Display message on map which will timeout after a certain time
-// messageType is `X` where `alert-X` is a boostrap class for alerts.
-function displayMessageOnMap(message, messageType, timeout) {
-
-  // Generate random number which will be used to uniquely identify the message
-  const min = 1;
-  const max = 100;
-  const tag = Math.floor(Math.random() * (max - min + 1)) + min;
-
-
-  const alertMessage = $(`
-    <div class="alert alert-${messageType} alert-dismissable fade show ml-5 mr-5" role="alert" style="z-index: 3;" id="map-message-${messageType}-${tag}">
-      ${message}
-    </div>`
-  );
-
-  $("#map").append(alertMessage);
-
-
-  setTimeout(() => {
-    $(`#map-message-${messageType}-${tag}`).remove();
-  }, timeout);
 }
 
 // Search for a location first and then the nearby carparks
@@ -378,13 +327,11 @@ async function fetchGeoJSONData() {
   geojsonData = await response.json();
 }
 
-
-
 // fetch GeoJSON and load it to the map as a layer if ready
 async function loadGeoJSONData() {
   try {
     await fetchGeoJSONData();
-    await waitTillTargetReady(isMapLoaded, 100);
+    await waitTillTargetReady(() => isMapReady(map), 100);
 
     map.addSource("carparks-data", {
       type: "geojson",
@@ -551,13 +498,6 @@ function updateSortButtonsUI() {
   }
 }
 
-function updateIHaveParkedButtonUI() {
-  if (storedInterestedCarpark === null) {
-    $('#i-have-parked-btn').hide();
-  } else {
-    $('#i-have-parked-btn').show();
-  }
-}
 
 // Place a search marker at the coordinate on the map
 // A search marker is different from a Pop Up
@@ -623,7 +563,7 @@ async function displayRouteUI(fromCoordinates, toCoordinates) {
 
     // Wait untill map is loaded and carparks are ready
     await waitTillTargetReady(() => {
-      return isMapLoaded() && isCarparksReady();
+      return isMapReady(map) && isCarparksReady(map);
     }, 100);
 
     // remove old route
@@ -680,12 +620,12 @@ async function updateRouteUI() {
 // 
 async function initialSetupUI() {
   loadGeoJSONData();
-  const newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo);
+  const newInterestedCarpark = await findCarparkFromNo(window.interestedCarparkNo, geojsonData);
   if (newInterestedCarpark !== null) {
     storedInterestedCarpark = { ...newInterestedCarpark };
   }
   updateInterestedCarparkUI();
-  updateIHaveParkedButtonUI();
+  updateIHaveParkedButtonUI(storedInterestedCarpark);
 
   // Set default user location to the middle of Singapore
   storedUserLocation = [103.8198, 1.3521];
@@ -898,7 +838,7 @@ map.on("click", "carparks-layer", (e) => {
 // decrease opacity of pins when zooming out
 map.on("zoom", function () {
   // Don't do anything if carparks not ready
-  if (!isCarparksReady()) {
+  if (!isCarparksReady(map)) {
     return;
   }
 
