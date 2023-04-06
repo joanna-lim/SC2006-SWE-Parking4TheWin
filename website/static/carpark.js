@@ -63,9 +63,6 @@ export default class CarparkData {
   }
 
   async findNearbyCarparks(coordinates, radiusInKm) {
-    // Create a Turf.js circle object around the center point
-    // const options = { steps: 10, units: 'kilometers' };
-    // const circle = turf.circle(coordinates, radiusInKm, options);
     var nearbyCarparks = [];
 
     await waitTillTargetReady(() => isCarparksReady(this.App), 100);
@@ -109,18 +106,6 @@ export default class CarparkData {
     }
   }
 }
-
-
-// // For a carpark object, find the distance of the carpark from the given center coordinate
-// // and add it to the carpark object
-// function addDistanceToCarpark(coordinates, carpark) {
-//   const carparkCoordinate = carpark.coordinates;
-//   const distance_in_km = turf.distance(turf.point(coordinates),
-//     turf.point(carparkCoordinate),
-//     { units: 'kilometers' })
-//     .toFixed(1);
-//   carpark.distance_in_km = parseFloat(distance_in_km);
-// }
 
 export function generateGeojsonData(carparkList) {
   let features = [];

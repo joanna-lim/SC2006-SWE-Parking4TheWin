@@ -24,7 +24,6 @@ var radiusInput = document.getElementById("radius-input");
 
 var App = {};
 App.carparkData = new CarparkData(App);
-
 App.map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/streets-v12",
