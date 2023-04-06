@@ -199,17 +199,9 @@ colorBlindModeBtn.addEventListener("click", function () {
 
 // Display popup containing carpark information when clicking on a pin
 App.map.on("click", "carparks-layer", (e) => {
+  const { car_park_no } = e.features[0].properties;
 
-  const coordinates = e.features[0].geometry.coordinates.slice();
-  const properties = e.features[0].properties;
-
-  const { address, car_park_no, car_park_type, free_parking, lots_available,
-          no_of_interested_drivers, type_of_parking_system, vacancy_percentage
-  } = properties;
-
-  App.popupSingletonFactory.createPopup(App, coordinates, address, car_park_no,
-                                          car_park_type, free_parking, lots_available,
-                                          no_of_interested_drivers, type_of_parking_system, vacancy_percentage);
+  App.popupSingletonFactory.createPopup(App, car_park_no);
 
 });
 

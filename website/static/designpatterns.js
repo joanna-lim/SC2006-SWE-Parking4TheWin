@@ -1,21 +1,27 @@
 // Subject-Object Design Pattern implemented using function callbacks
 export class Subject {
     constructor() {
-        this.observers = [];
+        this.callbacks = [];
     }
 
     addObserver(observer, callbackType, callback) {
-        this.observers.push({ observer: observer,
+        this.callbacks.push({ observer: observer,
                               callbackType: callbackType,
                               callback: callback});
     }
 
     removeObserver(observer) {
-        this.observers = this.observers.filter(obs => obs !== observer);
+        this.callbacks = this.callbacks.filter(c => c.observer.observerID !== observer.observerID);
     }
 
     notifyObservers(data, callbackType) {
-        this.observers.filter(observer => observer.callbackType === callbackType)
+        this.callbacks.filter(observer => observer.callbackType === callbackType)
                       .forEach(observer => observer.callback(data));
+    }
+}
+
+export class Observer {
+    constructor() {
+        this.observerID = Math.floor(Math.random() * 900000) + 100000;
     }
 }

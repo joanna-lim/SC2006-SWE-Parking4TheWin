@@ -40,7 +40,7 @@ export class Carpark extends Subject {
       }
     }
 
-    if (changed) this.notifyObservers(this, "carpark_update");
+    if (changed) this.notifyObservers(this, "carpark-update");
   }
 }
 

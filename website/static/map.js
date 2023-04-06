@@ -1,6 +1,7 @@
 import { getRoute, waitTillTargetReady } from "./helper.js";
 import { generateGeojsonData, updateInterestedCarpark } from "./carpark.js";
 import { SpinnerButton } from "./ui.js";
+import { Observer } from "./designpatterns.js";
 
 function isMapReady(App) {
   return App.map && App.map.loaded();
@@ -209,100 +210,126 @@ export async function loadGeoJSONData(App) {
   }
 }
 
-class Popup {
-  constructor(App, coordinates, address, car_park_no, car_park_type,
-    free_parking, lots_available, no_of_interested_drivers,
-    type_of_parking_system, vacancy_percentage) {
+class Popup extends Observer{
+  constructor(App, carpark) {
+    super();
+    
+    this.carpark = carpark;
 
-    const { map, interested_carpark_no, hasVehicle } = App;
+    const { map, interestedCarparkNo, hasVehicle } = App;
+    const { coordinates, address, car_park_no, car_park_type, free_parking, lots_available, 
+            no_of_interested_drivers, type_of_parking_system, vacancy_percentage } = carpark;
 
-    let interestedButtonText = "I'm interested";
-    if (car_park_no == interested_carpark_no) {
-      interestedButtonText = "I'm no longer interested";
-    }
+    let desc = Popup.generatePopupHTML(address, car_park_no, car_park_type,
+      free_parking, lots_available, no_of_interested_drivers,
+      type_of_parking_system, vacancy_percentage);
+    
+    console.log(car_park_no, interestedCarparkNo);
 
-    // while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-    //   coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-    // }
-
-    var desc = `<div class="row">
-                <div class="col-12">
-                  <h6>${address} (${car_park_no})</h6>
-                </div>
-              </div>
-              <br>
-              <div class="row">
-              <div class="col-12">
-                <strong>Carpark Type</strong>
-              </div>
-              <div class="col-12">
-                ${car_park_type}
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-12">
-                <strong>Free Parking</strong>
-              </div>
-              <div class="col-12">
-                ${free_parking}
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-12">
-                <strong>Type of Parking</strong>
-              </div>
-              <div class="col-12">
-                ${type_of_parking_system}
-              </div>
-            </div>
-            <br>
-            <div class="row">
-              <div class="col-8">
-                <strong>Lots Available</strong>
-              </div>
-              <div class="col">
-                ${lots_available}
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-8">
-                <strong>Vacancy Percentage</strong> 
-              </div>
-              <div class="col">
-                ${vacancy_percentage}%
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-8">
-                <strong>Interested Drivers</strong>
-              </div>
-              <div class="col">
-                <span id="mapboxgl-popup-content-interested">${no_of_interested_drivers}</span>
-              </div>
-            </div>
-            <br>
-              `
+    let interestedButtonText = car_park_no == interestedCarparkNo ? "I'm no longer interested" : "I'm interested";
 
     if (hasVehicle) {
       let buttonHTML = `<button type="button"
-                               class="btn btn-primary btn-sm w-100"
-                               id="mapboxgl-popup-content-button">
-                               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
-                               <span class="disabled-label" style="display: none;">Updating</span>
-                               <span class="enabled-label">${interestedButtonText}</span>
-                               
-                      </button>`;
+                                class="btn btn-primary btn-sm w-100"
+                                id="mapboxgl-popup-content-button">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
+                                <span class="disabled-label" style="display: none;">Updating</span>
+                                <span class="enabled-label">${interestedButtonText}</span>     
+                        </button>`;
       desc = desc + buttonHTML;
     }
 
-    new mapboxgl.Popup().setLngLat(coordinates).setHTML(desc).addTo(map);
-    new SpinnerButton("mapboxgl-popup-content-button", () => updateInterestedCarpark(App, address, car_park_no));
+    this.popup = new mapboxgl.Popup().setLngLat(coordinates).setHTML(desc).addTo(map);
+    new SpinnerButton("mapboxgl-popup-content-button", async () => {
+      await updateInterestedCarpark(App, address, car_park_no);
+      let interestedButtonText2 = car_park_no == App.interestedCarparkNo ? "I'm no longer interested" : "I'm interested";
+      $("#mapboxgl-popup-content-button .enabled-label").text(interestedButtonText2);
+    });
+
+    this.carpark.addObserver(this, "carpark-update", (data) => {
+      let { address, car_park_no, car_park_type, free_parking, lots_available, 
+        no_of_interested_drivers, type_of_parking_system, vacancy_percentage } = data;
+
+      $("#mapboxgl-popup-details")
+        .replaceWith(Popup.generatePopupHTML(address, car_park_no, car_park_type, free_parking,
+                                              lots_available, no_of_interested_drivers, type_of_parking_system,
+                                               vacancy_percentage));
+    });
+
+    console.log(this.carpark);
   }
 
   destroy() {
     // Remove exisiting popup
-    $(".mapboxgl-popup-content").remove();
-    $(".mapboxgl-popup-tip").remove();
+    this.popup.remove();
+    this.carpark.removeObserver(this);
+  }
+
+  static generatePopupHTML(address, car_park_no, car_park_type,
+    free_parking, lots_available, no_of_interested_drivers,
+    type_of_parking_system, vacancy_percentage) {
+
+    var desc = `<div id="mapboxgl-popup-details">
+                <div class="row">
+                  <div class="col-12">
+                    <h6>${address} (${car_park_no})</h6>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                <div class="col-12">
+                  <strong>Carpark Type</strong>
+                </div>
+                <div class="col-12">
+                  ${car_park_type}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <strong>Free Parking</strong>
+                </div>
+                <div class="col-12">
+                  ${free_parking}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <strong>Type of Parking</strong>
+                </div>
+                <div class="col-12">
+                  ${type_of_parking_system}
+                </div>
+              </div>
+              <br>
+              <div class="row">
+                <div class="col-8">
+                  <strong>Lots Available</strong>
+                </div>
+                <div class="col">
+                  ${lots_available}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-8">
+                  <strong>Vacancy Percentage</strong> 
+                </div>
+                <div class="col">
+                  ${vacancy_percentage}%
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-8">
+                  <strong>Interested Drivers</strong>
+                </div>
+                <div class="col">
+                  <span>${no_of_interested_drivers}</span>
+                </div>
+              </div>
+              <br>
+              </div>
+                `
+
+    return desc;
   }
 }
 
@@ -312,14 +339,10 @@ export class PopupSingletonFactory {
     this.popup = null;
   }
 
-  createPopup(App, coordinates, address, car_park_no, car_park_type,
-    free_parking, lots_available, no_of_interested_drivers,
-    type_of_parking_system, vacancy_percentage) {
+  createPopup(App, car_park_no) {
 
     if (this.popup) this.popup.destroy();
 
-    this.popup = new Popup(App, coordinates, address, car_park_no, car_park_type,
-      free_parking, lots_available, no_of_interested_drivers,
-      type_of_parking_system, vacancy_percentage);
+    this.popup = new Popup(App, App.carparkData.findCarparkByNo(car_park_no));
   }
 }
