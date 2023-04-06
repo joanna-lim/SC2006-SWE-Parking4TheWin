@@ -13,7 +13,6 @@ export function showSortButtonsUI() {
   $("#vacancy-sort-button").show();
 }
 
-// yes, the code is very repetitive
 export function updateSortButtonsUI(App) {
   if (App.sortType === "distance") {
     $("#vacancy-sort-button").addClass("sort-unfocused");
@@ -96,7 +95,7 @@ export function updateNearbyCarparksListUI(App) {
     const coordinates = carpark.coordinates;
 
     // Skip the interested carpark
-    if (carpark.car_park_no === window.interestedCarparkNo) {
+    if (carpark.car_park_no === App.interestedCarparkNo) {
       return;
     }
 
