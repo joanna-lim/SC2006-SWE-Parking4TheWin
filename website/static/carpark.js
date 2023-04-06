@@ -27,7 +27,7 @@ export class Carpark extends Subject {
   // Update carpark information by a list of name value pairs
   update(attributeNameValuePairs) {
     let changed = false;
-  
+
     for (let attributeName of Object.keys(attributeNameValuePairs)) {
       if (!this.hasOwnProperty(attributeName)) {
         console.error(`Object doesn't have the attribute ${attributeName}.`);
