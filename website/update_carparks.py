@@ -105,12 +105,26 @@ def generate_geojson():
     for carpark in carparks:
         if carpark.lots_available is None or carpark.total_lots is None or carpark.total_lots==0:
             continue
+        # feature = {
+        #     'geometry': {
+        #         'type': 'Point',
+        #         'coordinates': [carpark.longitude, carpark.latitude]
+        #     },
+        #     'properties': {
+        #         'car_park_no': carpark.car_park_no,
+        #         'address': carpark.address,
+        #         'total_lots': carpark.total_lots,
+        #         'lots_available': carpark.lots_available,
+        #         'vacancy_percentage': int((carpark.lots_available/carpark.total_lots)*100),
+        #         'car_park_type': carpark.car_park_type,
+        #         'type_of_parking_system': carpark.type_of_parking_system,
+        #         'free_parking': carpark.free_parking,
+        #         'no_of_interested_drivers': carpark.no_of_interested_drivers
+        #     },
+        #     'type': "Feature"
+        # }
         feature = {
-            'geometry': {
-                'type': 'Point',
-                'coordinates': [carpark.longitude, carpark.latitude]
-            },
-            'properties': {
+                'coordinates': [carpark.longitude, carpark.latitude],
                 'car_park_no': carpark.car_park_no,
                 'address': carpark.address,
                 'total_lots': carpark.total_lots,
@@ -120,15 +134,16 @@ def generate_geojson():
                 'type_of_parking_system': carpark.type_of_parking_system,
                 'free_parking': carpark.free_parking,
                 'no_of_interested_drivers': carpark.no_of_interested_drivers
-            },
-            'type': "Feature"
         }
         features.append(feature)
 
-    geojson = {
-        'type': 'FeatureCollection',
-        'features': features
-    }
+    # geojson = {
+    #     'type': 'FeatureCollection',
+    #     'features': features
+    # }
+
+    geojson = features
+
     json_str = json.dumps(geojson)
     with open(os.path.join('website', 'carparks.json'), 'w') as f:
         f.write(json_str)

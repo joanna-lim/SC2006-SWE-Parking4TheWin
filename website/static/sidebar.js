@@ -1,12 +1,12 @@
 import { centerMapUI } from "./map.js";
 
 export function updateIHaveParkedButtonUI(App) {
-    if (App.interestedCarpark) {
-      $('#i-have-parked-btn').show();
-    } else {
-      $('#i-have-parked-btn').hide();
-    }
+  if (App.interestedCarpark) {
+    $('#i-have-parked-btn').show();
+  } else {
+    $('#i-have-parked-btn').hide();
   }
+}
 
 export function showSortButtonsUI() {
   $("#distance-sort-button").show();
@@ -43,11 +43,10 @@ export function updateSortButtonsUI(App) {
 // Moreover, tag the list item UI with `item_id` to make it easier
 // to change with jquery
 function createCarparksListItemUI(App, carpark, interested, item_id) {
-  const carparkCoordinate = carpark.geometry.coordinates;
-  const properties = carpark.properties;
-  const address = properties.address;
-  const vacancyPercentage = properties.vacancy_percentage;
-  const distanceInKM = properties.distanceInKM;
+  const carparkCoordinate = carpark.coordinates;
+  const address = carpark.address;
+  const vacancyPercentage = carpark.vacancy_percentage;
+  const distane_in_km = carpark.distance_in_km;
 
   const button = $("<button/>", {
     type: "button",
@@ -57,8 +56,8 @@ function createCarparksListItemUI(App, carpark, interested, item_id) {
               <span class="badge badge-secondary badge-pill mr-1">${vacancyPercentage}% Vacant</span>`
   });
 
-  if (typeof distanceInKM !== 'undefined' && distanceInKM !== null) {
-    button.append(`<span class="badge badge-info badge-pill">${distanceInKM}km</span>`);
+  if (typeof distane_in_km !== 'undefined' && distane_in_km !== null) {
+    button.append(`<span class="badge badge-info badge-pill">${distane_in_km}km</span>`);
   }
   if (interested) {
     button.addClass("active");
@@ -94,19 +93,14 @@ export function updateNearbyCarparksListUI(App) {
 
   App.nearbyCarparks.forEach((carpark) => {
 
-    const coordinates = carpark.geometry.coordinates;
-    const properties = carpark.properties;
+    const coordinates = carpark.coordinates;
 
     // Skip the interested carpark
-    if (properties.car_park_no === window.interestedCarparkNo) {
+    if (carpark.car_park_no === window.interestedCarparkNo) {
       return;
     }
 
-    const address = properties.address;
-    const vacancyPercentage = properties.vacancy_percentage;
-    const distanceInKM = properties.distanceInKM;
-
-    nearbyCarparksList.append(createCarparksListItemUI(App, carpark, false, "nearby-carpark-list-item-" + properties.car_park_no));
+    nearbyCarparksList.append(createCarparksListItemUI(App, carpark, false, "nearby-carpark-list-item-" + carpark.car_park_no));
   });
 }
 

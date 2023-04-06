@@ -11,9 +11,9 @@
     Mapbox
     UI Elements
 */
-import { displayMessageOnMap, updateRouteUI, centerMapUI, placeSearchMarkerUI, updateUserLocationUI, loadGeoJSONData } from "./map.js";
+import { isCarparksReady, displayMessageOnMap, updateRouteUI, centerMapUI, placeSearchMarkerUI, updateUserLocationUI, loadGeoJSONData } from "./map.js";
 import { updateIHaveParkedButtonUI, showSortButtonsUI, updateSortButtonsUI, updateInterestedCarparkUI, updateNearbyCarparksListUI } from "./sidebar.js";
-import { findCarparkFromNo, findNearbyCarparks, isCarparksReady, sortCarparks } from "./carpark.js";
+import CarparkData from "./carpark.js";
 import { waitTillTargetReady, getUserLocation } from "./helper.js";
 
 mapboxgl.accessToken = window.MAPBOX_SECRET_KEY;
@@ -23,7 +23,8 @@ var locationInput = document.getElementById("location-input");
 var radiusInput = document.getElementById("radius-input");
 
 var App = {};
-App.geojsonData = null;
+App.carparkData = new CarparkData(App);
+
 App.map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/streets-v12",
@@ -83,8 +84,7 @@ async function updateInterestedCarpark(address, carParkNo) {
         window.interestedCarparkNo = carParkNo;
 
         // Change button to "Update"
-        var newInterestedCarpark = await findCarparkFromNo(App, window.interestedCarparkNo);
-
+        var newInterestedCarpark = await App.carparkData.findCarparkByNo(window.interestedCarparkNo);
         // Update button
         interestedButton.find(".enabled-label").text("I'm no longer interested.");
 
@@ -155,7 +155,7 @@ async function search() {
 
     placeSearchMarkerUI(App, coordinates, data.features[0].place_name);
     centerMapUI(App, coordinates, radiusInKm);
-    const newNearbyCarparks = await findNearbyCarparks(App, coordinates, radiusInKm);
+    const newNearbyCarparks = await App.carparkData.findNearbyCarparks(coordinates, radiusInKm);
     App.nearbyCarparks = newNearbyCarparks;
 
     // if user is searching for the first time
@@ -164,7 +164,7 @@ async function search() {
       App.sortOrder = 'desc';
     }
 
-    sortCarparks(App);
+    App.carparkData.sortCarparks();
     updateNearbyCarparksListUI(App);
     showSortButtonsUI();
     updateSortButtonsUI(App);
@@ -179,15 +179,22 @@ async function search() {
 
 // 
 async function initialSetupUI() {
+  const response = await fetch("/carparks", {
+    method: "GET"
+  });
+  const data = await response.json();
+
+  await App.carparkData.addCarparks(data);
+
   loadGeoJSONData(App);
-  
+
   await waitTillTargetReady(() => App.geojsonData, 100);
 
-  const newInterestedCarpark = await findCarparkFromNo(App, window.interestedCarparkNo);
+  const newInterestedCarpark = await App.carparkData.findCarparkByNo(window.interestedCarparkNo);
   if (newInterestedCarpark !== null) {
     App.interestedCarpark = { ...newInterestedCarpark };
   }
-  
+
   updateInterestedCarparkUI(App);
   updateIHaveParkedButtonUI(App);
 
@@ -241,7 +248,7 @@ document.getElementById("distance-sort-button").addEventListener("click", () => 
     // toggle
     App.sortOrder = App.sortOrder === "asc" ? "desc" : "asc";
   }
-  sortCarparks(App);
+  App.carparkData.sortCarparks();
   updateNearbyCarparksListUI(App);
   updateSortButtonsUI(App);
 });
@@ -256,7 +263,7 @@ document.getElementById("vacancy-sort-button").addEventListener("click", () => {
     // toggle
     App.sortOrder = App.sortOrder === "asc" ? "desc" : "asc";
   }
-  sortCarparks(App);
+  App.carparkData.sortCarparks();
   updateNearbyCarparksListUI(App);
   updateSortButtonsUI(App);
 });
@@ -285,11 +292,11 @@ document.getElementById("sidebar-toggle-button").addEventListener("click", () =>
 document.getElementById("get-user-location-btn").addEventListener("click", () => getUserLocation(App));
 
 colorBlindModeBtn.addEventListener("click", function () {
-    App.isColorBlindModeOn = !App.isColorBlindModeOn;
-    App.map.removeLayer("carparks-layer");
-    App.map.removeSource("carparks-data");
-    loadGeoJSONData(App);
-  });
+  App.isColorBlindModeOn = !App.isColorBlindModeOn;
+  App.map.removeLayer("carparks-layer");
+  App.map.removeSource("carparks-data");
+  loadGeoJSONData(App);
+});
 
 // Display popup containing carpark information when clicking on a pin
 App.map.on("click", "carparks-layer", (e) => {

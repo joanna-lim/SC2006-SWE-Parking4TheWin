@@ -3,7 +3,7 @@ import { updateRouteUI, updateUserLocationUI, centerMapUI } from "./map.js";
 // wait untill some target is ready
 export async function waitTillTargetReady(isTargetReady, milliseconds) {
   while (!isTargetReady()) {
-    // wait 1 second before retrying
+    // wait specified amount of time before retrying
     await new Promise(resolve => setTimeout(resolve, milliseconds));
   }
 }
@@ -58,4 +58,21 @@ export async function getUserLocation(App) {
       centerMapUI(App, App.userLocation);
     }
   });
+}
+
+// Returns distance between 2 coordinate points in KM
+export function haversine(coord1, coord2) {
+  const R = 6371; // radius of the Earth in kilometers
+  const dLat = toRadians(coord2[0] - coord1[0]);
+  const dLon = toRadians(coord2[1] - coord1[1]);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(coord1[0])) * Math.cos(toRadians(coord2[0])) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  return Math.abs(distance);
+}
+
+function toRadians(degrees) {
+  return degrees * Math.PI / 180;
 }

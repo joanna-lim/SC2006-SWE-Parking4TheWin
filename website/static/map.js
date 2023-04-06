@@ -1,10 +1,13 @@
 import { getRoute, waitTillTargetReady } from "./helper.js";
-import { isCarparksReady } from "./carpark.js";
+import { generateGeojsonData } from "./carpark.js";
 
-// Mapbox related stuff
-
-export function isMapReady(App) {
+function isMapReady(App) {
   return App.map && App.map.loaded();
+}
+
+// Determines if "carparks-data" and "carparks-layer" are ready
+export function isCarparksReady(App) {
+  return App.map && App.map.getSource('carparks-data') && App.map.getLayer('carparks-layer');
 }
 
 // Display message on map which will timeout after a certain time
@@ -80,7 +83,7 @@ export async function updateRouteUI(App) {
       return;
     }
 
-    const toCoordinates = App.interestedCarpark.geometry.coordinates;
+    const toCoordinates = App.interestedCarpark.coordinates;
     await displayRouteUI(App, App.userLocation, toCoordinates);
   } catch (error) {
     console.error(error);
@@ -158,15 +161,9 @@ export function updateUserLocationUI(App) {
 // fetch GeoJSON and load it to the map as a layer if ready
 export async function loadGeoJSONData(App) {
   try {
-    const response = await fetch("/carparks", {
-      method: "GET"
-    });
-    App.geojsonData = await response.json();
-    await waitTillTargetReady(() => isMapReady(App), 100);
-
     App.map.addSource("carparks-data", {
       type: "geojson",
-      data: App.geojsonData,
+      data: generateGeojsonData(App.carparkData.carparkList),
     });
 
     const colorBlindColours = {

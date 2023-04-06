@@ -1,108 +1,161 @@
-import { waitTillTargetReady } from "./helper.js";
+import { waitTillTargetReady, haversine } from "./helper.js";
+import { isCarparksReady } from "./map.js";
 
 
-export async function findCarparkFromNo(App, carparkNo) {
+export class Carpark {
+  constructor(coordinates, address, car_park_no, car_park_type,
+    free_parking, lots_available, no_of_interested_drivers,
+    total_lots, type_of_parking_system, vacancy_percentage, distance_in_km) {
+    this.coordinates = coordinates;
+    this.address = address;
+    this.car_park_no = car_park_no;
+    this.car_park_type = car_park_type;
+    this.free_parking = free_parking;
+    this.lots_available = lots_available;
+    this.no_of_interested_drivers = no_of_interested_drivers;
+    this.total_lots = total_lots;
+    this.type_of_parking_system = type_of_parking_system;
+    this.vacancy_percentage = vacancy_percentage;
+    this.distance_in_km = null;
+  }
+}
+
+export default class CarparkData {
+  constructor(App) {
+    this.App = App;
+    this.carparkList = [];
+    this.interestedCarpark = null;
+    this.nearbyCarparks = null;
+  }
+
+  async addCarparks(carparksInJson) {
+    for (let carparkInJson of carparksInJson) {
+      const { coordinates, address, car_park_no, car_park_type,
+        free_parking, lots_available, no_of_interested_drivers,
+        total_lots, type_of_parking_system, vacancy_percentage,
+      } = carparkInJson;
+
+      const carpark = new Carpark(coordinates, address, car_park_no,
+        car_park_type, free_parking, lots_available,
+        no_of_interested_drivers, total_lots, type_of_parking_system,
+        vacancy_percentage, null);
+
+      this.carparkList.push(carpark);
+    }
+  }
+
+  async updateCarparkByNo(carparkNo) {
+
+  }
+
+  async findCarparkByNo(carparkNo) {
     if (!carparkNo) {
       return null;
     }
-  
-    await waitTillTargetReady(() => App.geojsonData, 100);
-  
-    for (let carpark of App.geojsonData.features) {
-      if (carpark.properties.car_park_no === carparkNo) {
+
+    for (let carpark of this.carparkList) {
+      if (carpark.car_park_no === carparkNo) {
         return carpark;
       }
     }
+
     return null;    // this shouldn't happen
   }
 
-// For a carpark object, find the distance of the carpark from the given center coordinate
-// and add it to the carpark object
-export function addDistanceToCarpark(coordinates, carpark) {
-  const carparkCoordinate = carpark.geometry.coordinates;
-  const distanceInKM = turf.distance(turf.point(coordinates),
-    turf.point(carparkCoordinate),
-    { units: 'kilometers' })
-    .toFixed(1);
-  carpark.properties.distanceInKM = parseFloat(distanceInKM);
-}
+  async findNearbyCarparks(coordinates, radiusInKm) {
+    // Create a Turf.js circle object around the center point
+    // const options = { steps: 10, units: 'kilometers' };
+    // const circle = turf.circle(coordinates, radiusInKm, options);
+    var nearbyCarparks = [];
 
-// Determines if "carparks-data" and "carparks-layer" are ready
-export function isCarparksReady(App) {
-  return App.map && App.map.getSource('carparks-data') && App.map.getLayer('carparks-layer');
-}
+    await waitTillTargetReady(() => isCarparksReady(this.App), 100);
 
-export async function findNearbyCarparks(App, coordinates, radiusInKm) {
-  // Create a Turf.js circle object around the center point
-  const options = { steps: 10, units: 'kilometers' };
-  const circle = turf.circle(coordinates, radiusInKm, options);
-  var carparks = null;
+    for (let carpark of this.carparkList) {
+      const distance = haversine(coordinates, carpark.coordinates).toFixed(1);
+      if (distance <= radiusInKm) {
+        carpark.distance_in_km = distance;
+        nearbyCarparks.push(carpark);
+      }
+    }
 
-  await waitTillTargetReady(() => isCarparksReady(App), 100);
-
-  /*
-   * Note that the method that I used to find nearby carparks (map.querySourceFeatures)
-   * has some quirks. I think it depends on the `features` visible on the map.
-   * I can't change the way it works because its from mapbox API. 
-   */
-
-  // Find carparks in the Turf.js circle object
-  // This will not always succeed - sometimes return an empty list and sometimes
-  // return duplicate entries.
-  carparks = App.map.querySourceFeatures('carparks-data', {
-    sourceLayer: 'carparks-layer',
-    filter: ['within', circle],
-  });
-
-  // This is a band-aid solution to the empty list problem.
-  while (carparks === null || carparks.length === 0) {
-    // wait 1 second before retrying
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    carparks = App.map.querySourceFeatures('carparks-data', {
-      sourceLayer: 'carparks-layer',
-      filter: ['within', circle],
-    });
+    return nearbyCarparks;
   }
 
-  // Remove duplicate entries
-  carparks = carparks.filter((value, index, self) =>
-    index === self.findIndex((t) => (
-      t.properties.car_park_no === value.properties.car_park_no
-    ))
-  )
+  // Sort nearby carparks based on sortType and sortOrder
+  // Note that this must be used in conjunction with updateNearbyCarparksUI
+  sortCarparks() {
+    if (this.App.nearbyCarparks === null || this.App.sortOrder === null || this.App.sortType === null) return;
 
-  carparks.forEach((carpark) => {
-    addDistanceToCarpark(coordinates, carpark);
-  })
-
-  return carparks;
-}
-
-// Sort nearby carparks based on sortType and sortOrder
-// Note that this must be used in conjunction with updateNearbyCarparksUI
-export function sortCarparks(App) {
-  if (App.nearbyCarparks === null || App.sortOrder === null || App.sortType === null) return;
-
-  if (App.sortType === "distance") {
-    if (App.sortOrder === "asc") {
-      App.nearbyCarparks.sort((a, b) => {
-        return a.properties.distanceInKM - b.properties.distanceInKM;
-      });
+    if (this.App.sortType === "distance") {
+      if (this.App.sortOrder === "asc") {
+        this.App.nearbyCarparks.sort((a, b) => {
+          return a.distance_in_km - b.distance_in_km;
+        });
+      } else {
+        this.App.nearbyCarparks.sort((a, b) => {
+          return b.distance_in_km - a.distance_in_km;
+        });
+      }
     } else {
-      App.nearbyCarparks.sort((a, b) => {
-        return b.properties.distanceInKM - a.properties.distanceInKM;
-      });
-    }
-  } else {
-    if (App.sortOrder === "asc") {
-      App.nearbyCarparks.sort((a, b) => {
-        return a.properties.vacancy_percentage - b.properties.vacancy_percentage;
-      });
-    } else {
-      App.nearbyCarparks.sort((a, b) => {
-        return b.properties.vacancy_percentage - a.properties.vacancy_percentage;
-      });
+      if (this.App.sortOrder === "asc") {
+        this.App.nearbyCarparks.sort((a, b) => {
+          return a.vacancy_percentage - b.vacancy_percentage;
+        });
+      } else {
+        this.App.nearbyCarparks.sort((a, b) => {
+          return b.vacancy_percentage - a.vacancy_percentage;
+        });
+      }
     }
   }
+}
+
+
+// // For a carpark object, find the distance of the carpark from the given center coordinate
+// // and add it to the carpark object
+// function addDistanceToCarpark(coordinates, carpark) {
+//   const carparkCoordinate = carpark.coordinates;
+//   const distance_in_km = turf.distance(turf.point(coordinates),
+//     turf.point(carparkCoordinate),
+//     { units: 'kilometers' })
+//     .toFixed(1);
+//   carpark.distance_in_km = parseFloat(distance_in_km);
+// }
+
+export function generateGeojsonData(carparkList) {
+  let features = [];
+
+  for (let carpark of carparkList) {
+    const { coordinates, address, car_park_no, car_park_type,
+      free_parking, lots_available, no_of_interested_drivers,
+      total_lots, type_of_parking_system, vacancy_percentage,
+    } = carpark;
+
+    const feature = {
+      'type': "Feature",
+      'geometry': {
+        'type': 'Point',
+        'coordinates': coordinates
+      },
+      'properties': {
+        'address': address,
+        'car_park_no': car_park_no,
+        'car_park_type': car_park_type,
+        'free_parking': free_parking,
+        'lots_available': lots_available,
+        'no_of_interested_drivers': no_of_interested_drivers,
+        'total_lots': total_lots,
+        'type_of_parking_system': type_of_parking_system,
+        'vacancy_percentage': vacancy_percentage
+      }
+    }
+    features.push(feature);
+  }
+
+  const geojsonData = {
+    'type': 'FeatureCollection',
+    'features': features
+  };
+
+  return geojsonData;
 }
