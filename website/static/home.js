@@ -1,16 +1,3 @@
-/*
-  BEHOLD THE GLORY OF PURE JS WITHOUT MODULES
-  Structure of file
-  ----
-  Consts
-  Variables
-  Helper Functions
-    General
-    UI Related
-  Actual code execution
-    Mapbox
-    UI Elements
-*/
 import { isCarparksReady, displayMessageOnMap, updateRouteUI, centerMapUI, placeSearchMarkerUI, updateUserLocationUI, loadGeoJSONData } from "./map.js";
 import { updateIHaveParkedButtonUI, showSortButtonsUI, updateSortButtonsUI, updateInterestedCarparkUI, updateNearbyCarparksListUI } from "./sidebar.js";
 import CarparkData from "./carpark.js";
@@ -186,8 +173,6 @@ async function initialSetupUI() {
   await App.carparkData.addCarparks(data);
 
   loadGeoJSONData(App);
-
-  await waitTillTargetReady(() => App.geojsonData, 100);
 
   const newInterestedCarpark = await App.carparkData.findCarparkByNo(window.interestedCarparkNo);
   if (newInterestedCarpark !== null) {
