@@ -135,6 +135,8 @@ document.getElementById("distance-sort-button").addEventListener("click", () => 
     App.sortOrder = App.sortOrder === "asc" ? "desc" : "asc";
   }
   App.carparkData.sortCarparks();
+  updateNearbyCarparksListUI(App);
+  updateSortButtonsUI(App);
 });
 
 document.getElementById("vacancy-sort-button").addEventListener("click", () => {

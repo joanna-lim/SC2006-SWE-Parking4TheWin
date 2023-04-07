@@ -110,7 +110,7 @@ export default class CarparkData extends Subject {
         nearbyCarparks.push(carpark);
       }
     }
-
+    
     return nearbyCarparks;
   }
 
@@ -120,9 +120,9 @@ export default class CarparkData extends Subject {
       vacancy: "vacancy_percentage",
     };
 
-    const { nearbyCarparks, sortOrder, sortType } = this.App;
+    const { sortOrder, sortType } = this.App;
 
-    if (!nearbyCarparks || !sortOrder || !sortType) {
+    if (!this.nearbyCarparks || !sortOrder || !sortType) {
       return;
     }
 
@@ -139,8 +139,7 @@ export default class CarparkData extends Subject {
         return b[propertyToSortBy] - a[propertyToSortBy];
       }
     };
-
-    nearbyCarparks.sort(sortFunction);
+    this.nearbyCarparks.sort(sortFunction);
   }
 
   // Update database with the user's interested carpark

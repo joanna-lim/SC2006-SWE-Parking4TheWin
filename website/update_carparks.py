@@ -48,18 +48,29 @@ def format_carpark_information(record):
     return fattributes
 
 # HDB carpark information mainly consists of information that changes rarely
-# We will only need to update everytime the webapp is started
+# We only need to update once per day
 def update_carparks():
     print("XXXXX Updating carparks XXXXXXXXXXXXXXXXXX")
     from . import db
     from .models import CarPark
     import csv
 
-    records = list()
-    with open('./website/hdb-carpark-information.csv', newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', quotechar='"')
-        for row in reader:
-            records.append(row)
+    # There are 2196 carparks in Singapore currently, which is why I set the limit in the url to be 3000
+    url = "https://data.gov.sg/api/action/datastore_search?resource_id=139a3035-e624-4f56-b63f-89ae28d4ae4c&limit=3000"
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    }
+
+    req = urllib.request.Request(url, headers=headers)
+    fileobj = urllib.request.urlopen(req)
+    json_data = json.load(fileobj)
+
+    keys_in_order = ['car_park_no', 'address', 'x_coord', 'y_coord', 'car_park_type',
+                'type_of_parking_system', 'short_term_parking', 'free_parking',
+                'night_parking', 'car_park_decks', 'gantry_height', 'car_park_basement']
+
+    records = [[r[k] for k in keys_in_order] for r in json_data["result"]["records"]]
 
     for record in records:
         carpark = CarPark.query.get(record[0])
