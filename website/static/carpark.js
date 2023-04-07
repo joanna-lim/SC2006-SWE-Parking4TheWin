@@ -52,10 +52,11 @@ export default class CarparkData extends Subject {
     this.carparkList = []; // This is used for sorting
     this.carparkDict = {}; // This is intended for fast lookup, key is car_park_no
     this.interestedCarpark = null;
+    this.interestedCarparkNo = window.interestedCarparkNo === "None" ? null : window.interestedCarparkNo;
     this.nearbyCarparks = null;
   }
 
-  initializeFromJson(carparksInJson) {
+  initializeCarparksFromJson(carparksInJson) {
     for (let carparkInJson of carparksInJson) {
       const { coordinates, address, car_park_no, car_park_type,
         free_parking, lots_available, no_of_interested_drivers,
@@ -72,13 +73,13 @@ export default class CarparkData extends Subject {
     }
   }
 
-  updateFromJson(updatedCarparksInJson) {
+  updateCarparksFromJson(updatedCarparksInJson) {
     for (let carparkInJson of updatedCarparksInJson) {
-      this.findCarparkByNo(carparkInJson.car_park_no).update(carparkInJson);
+      this.findCarparkFromNo(carparkInJson.car_park_no).update(carparkInJson);
     }
   }
 
-  findCarparkByNo(carparkNo) {
+  findCarparkFromNo(carparkNo) {
     if (!carparkNo) {
       console.error("carparkNo is null. Invalid.");
       return null;
@@ -90,6 +91,11 @@ export default class CarparkData extends Subject {
       console.error("No such carpark of that number exists.");
     }
     return carpark;
+  }
+
+  async updateNearbyCarparks(coordinates, radiusInKm) {
+    this.nearbyCarparks = await this.findNearbyCarparks(coordinates, radiusInKm);
+    this.notifyObservers(this.nearbyCarparks, "nearby-carpark-list-update")
   }
 
   async findNearbyCarparks(coordinates, radiusInKm) {
@@ -136,6 +142,48 @@ export default class CarparkData extends Subject {
 
     nearbyCarparks.sort(sortFunction);
   }
+
+  // Update database with the user's interested carpark
+  async updateInterestedCarpark(App, address, carParkNo) {
+    try {
+      const response = await fetch('/drivers', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ intent: "update_interested_carpark", carpark_address: address })
+      });
+
+      const { success, updatedgeojsondata, op_type } = await response.json();
+
+      if (success) {
+        this.updateCarparksFromJson(updatedgeojsondata);
+
+        this.App.map.getSource("carparks-data").setData({
+          type: "geojson",
+          ...generateGeojsonData(this.carparkList)
+        });
+
+        if (op_type == 1) {
+          this.interestedCarparkNo = carParkNo;
+
+          var newInterestedCarpark = await App.carparkData.findCarparkFromNo(this.interestedCarparkNo);
+          this.interestedCarpark = { ...newInterestedCarpark };
+        } else {
+          this.interestedCarparkNo = null;
+          this.interestedCarpark = null;
+        }
+      }
+      // Update side
+      updateInterestedCarparkUI(App);
+      updateIHaveParkedButtonUI(App);
+      // Update route
+      await updateRouteUI(App);
+
+    } catch (error) {
+      return console.error(error);
+    }
+  }
 }
 
 export function generateGeojsonData(carparkList) {
@@ -174,46 +222,4 @@ export function generateGeojsonData(carparkList) {
   };
 
   return geojsonData;
-}
-
-// Update database with the user's interested carpark
-export async function updateInterestedCarpark(App, address, carParkNo) {
-  try {
-    const response = await fetch('/drivers', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ intent: "update_interested_carpark", carpark_address: address })
-    });
-
-    const { success, updatedgeojsondata, op_type } = await response.json();
-
-    if (success) {
-      App.carparkData.updateFromJson(updatedgeojsondata);
-
-      App.map.getSource("carparks-data").setData({
-        type: "geojson",
-        ...generateGeojsonData(App.carparkData.carparkList)
-      });
-
-      if (op_type == 1) {
-        App.interestedCarparkNo = carParkNo;
-
-        var newInterestedCarpark = await App.carparkData.findCarparkByNo(App.interestedCarparkNo);
-        App.interestedCarpark = { ...newInterestedCarpark };
-      } else {
-        App.interestedCarparkNo = null;
-        App.interestedCarpark = null;
-      }
-    }
-    // Update side
-    updateInterestedCarparkUI(App);
-    updateIHaveParkedButtonUI(App);
-    // Update route
-    await updateRouteUI(App);
-
-  } catch (error) {
-    return console.error(error);
-  }
 }

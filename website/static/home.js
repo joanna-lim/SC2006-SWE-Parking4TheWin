@@ -1,12 +1,11 @@
 import { isCarparksReady, displayMessageOnMap, updateRouteUI, centerMapUI, placeSearchMarkerUI, updateUserLocationUI, loadGeoJSONData, PopupSingletonFactory } from "./map.js";
 import { updateIHaveParkedButtonUI, showSortButtonsUI, updateSortButtonsUI, updateInterestedCarparkUI, updateNearbyCarparksListUI } from "./sidebar.js";
-import CarparkData, { updateInterestedCarpark } from "./carpark.js";
-import { waitTillTargetReady, getUserLocation } from "./helper.js";
+import CarparkData from "./carpark.js";
+import { getUserLocation } from "./helper.js";
 import { SpinnerButton } from "./ui.js";
 
 mapboxgl.accessToken = window.MAPBOX_SECRET_KEY;
 
-var searchForm = document.getElementById("search-form");
 var locationInput = document.getElementById("location-input");
 var radiusInput = document.getElementById("radius-input");
 
@@ -20,9 +19,7 @@ App.map = new mapboxgl.Map({
   zoom: 12,
 });
 
-App.searchMarker = null;    // there can only be one search marker at a time
-App.interestedCarpark = null; // this is different from window.interestedCarparkNo
-App.nearbyCarparks = null;
+App.searchMarker = null;    // there can only be one search marker at a time 
 
 App.popupSingletonFactory = new PopupSingletonFactory();
 
@@ -35,10 +32,6 @@ App.oldSortOrder = null;
 // Set default user location to the middle of Singapore
 App.userLocation = [103.8198, 1.3521];
 App.userMarker = null;
-
-// Jinja passes interested carpark as "None" instead of null
-// Ensure that it is null
-App.interestedCarparkNo = window.interestedCarparkNo === "None" ? null : window.interestedCarparkNo;
 
 App.hasVehicle = window.hasVehicle;
 
@@ -78,8 +71,7 @@ async function search() {
 
     placeSearchMarkerUI(App, coordinates, data.features[0].place_name);
     centerMapUI(App, coordinates, radiusInKm);
-    const newNearbyCarparks = await App.carparkData.findNearbyCarparks(coordinates, radiusInKm);
-    App.nearbyCarparks = newNearbyCarparks;
+    App.carparkData.updateNearbyCarparks(coordinates, radiusInKm);
 
     // if user is searching for the first time
     if (App.sortType === null) {
@@ -107,13 +99,13 @@ async function initialSetupUI() {
   });
   const data = await response.json();
 
-  await App.carparkData.initializeFromJson(data);
+  await App.carparkData.initializeCarparksFromJson(data);
 
   loadGeoJSONData(App);
 
-  const newInterestedCarpark = await App.carparkData.findCarparkByNo(App.interestedCarparkNo);
+  const newInterestedCarpark = await App.carparkData.findCarparkFromNo(App.carparkData.interestedCarparkNo);
   if (newInterestedCarpark !== null) {
-    App.interestedCarpark = { ...newInterestedCarpark };
+    App.carparkData.interestedCarpark = { ...newInterestedCarpark };
   }
 
   updateInterestedCarparkUI(App);
@@ -148,8 +140,6 @@ document.getElementById("distance-sort-button").addEventListener("click", () => 
     App.sortOrder = App.sortOrder === "asc" ? "desc" : "asc";
   }
   App.carparkData.sortCarparks();
-  updateNearbyCarparksListUI(App);
-  updateSortButtonsUI(App);
 });
 
 document.getElementById("vacancy-sort-button").addEventListener("click", () => {

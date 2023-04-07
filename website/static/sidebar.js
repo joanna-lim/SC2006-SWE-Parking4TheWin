@@ -1,7 +1,7 @@
 import { centerMapUI } from "./map.js";
 
 export function updateIHaveParkedButtonUI(App) {
-  if (App.interestedCarpark) {
+  if (App.carparkData.interestedCarpark) {
     $('#i-have-parked-btn').show();
   } else {
     $('#i-have-parked-btn').hide();
@@ -36,6 +36,8 @@ export function updateSortButtonsUI(App) {
     }
   }
 }
+
+
 
 // Creates and returns a carparks list item UI (button)
 // If `interested` is true, then the list item will be styled differently
@@ -85,17 +87,17 @@ function createCarparksListItemUI(App, carpark, interested, item_id) {
 export function updateNearbyCarparksListUI(App) {
   const nearbyCarparksList = $("#nearby-carparks-list");
 
-  if (App.nearbyCarparks === null) return;
+  if (App.carparkData.nearbyCarparks === null) return;
 
   nearbyCarparksList.empty();
   updateInterestedCarparkUI(App);
 
-  App.nearbyCarparks.forEach((carpark) => {
+  App.carparkData.nearbyCarparks.forEach((carpark) => {
 
     const coordinates = carpark.coordinates;
 
     // Skip the interested carpark
-    if (carpark.car_park_no === App.interestedCarparkNo) {
+    if (carpark.car_park_no === App.carparkData.interestedCarparkNo) {
       return;
     }
 
@@ -107,12 +109,12 @@ export function updateNearbyCarparksListUI(App) {
 export function updateInterestedCarparkUI(App) {
   const nearbyCarparksList = $("#nearby-carparks-list");
 
-  if (App.interestedCarpark === null) {
+  if (App.carparkData.interestedCarpark === null) {
     $('#interested-carpark-list-item').remove();
     return;
   }
 
-  const newInterestCarparkItem = createCarparksListItemUI(App, App.interestedCarpark, true, "interested-carpark-list-item");
+  const newInterestCarparkItem = createCarparksListItemUI(App, App.carparkData.interestedCarpark, true, "interested-carpark-list-item");
 
   if ($('#interested-carpark-list-item').length) { // this tests if interested carpark list item exists
     $('#interested-carpark-list-item').replaceWith(newInterestCarparkItem);

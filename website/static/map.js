@@ -1,7 +1,6 @@
 import { getRoute, waitTillTargetReady } from "./helper.js";
-import { generateGeojsonData, updateInterestedCarpark } from "./carpark.js";
+import { generateGeojsonData } from "./carpark.js";
 import { SpinnerButton } from "./ui.js";
-import { Observer } from "./designpatterns.js";
 
 function isMapReady(App) {
   return App.map && App.map.loaded();
@@ -80,12 +79,12 @@ async function displayRouteUI(App, fromCoordinates, toCoordinates) {
 
 export async function updateRouteUI(App) {
   try {
-    if (App.interestedCarpark === null) {
+    if (App.carparkData.interestedCarpark === null) {
       await removeRouteUI(App);
       return;
     }
 
-    const toCoordinates = App.interestedCarpark.coordinates;
+    const toCoordinates = App.carparkData.interestedCarpark.coordinates;
     await displayRouteUI(App, App.userLocation, toCoordinates);
   } catch (error) {
     console.error(error);
@@ -210,21 +209,18 @@ export async function loadGeoJSONData(App) {
   }
 }
 
-class Popup extends Observer{
+class Popup {
   constructor(App, carpark) {
-    super();
-    
     this.carpark = carpark;
 
-    const { map, interestedCarparkNo, hasVehicle } = App;
+    const { map, hasVehicle } = App;
+    const interestedCarparkNo = App.carparkData.interestedCarparkNo;
     const { coordinates, address, car_park_no, car_park_type, free_parking, lots_available, 
             no_of_interested_drivers, type_of_parking_system, vacancy_percentage } = carpark;
 
     let desc = Popup.generatePopupHTML(address, car_park_no, car_park_type,
       free_parking, lots_available, no_of_interested_drivers,
       type_of_parking_system, vacancy_percentage);
-    
-    console.log(car_park_no, interestedCarparkNo);
 
     let interestedButtonText = car_park_no == interestedCarparkNo ? "I'm no longer interested" : "I'm interested";
 
@@ -241,8 +237,8 @@ class Popup extends Observer{
 
     this.popup = new mapboxgl.Popup().setLngLat(coordinates).setHTML(desc).addTo(map);
     new SpinnerButton("mapboxgl-popup-content-button", async () => {
-      await updateInterestedCarpark(App, address, car_park_no);
-      let interestedButtonText2 = car_park_no == App.interestedCarparkNo ? "I'm no longer interested" : "I'm interested";
+      await App.carparkData.updateInterestedCarpark(App, address, car_park_no);
+      let interestedButtonText2 = car_park_no == App.carparkData.interestedCarparkNo ? "I'm no longer interested" : "I'm interested";
       $("#mapboxgl-popup-content-button .enabled-label").text(interestedButtonText2);
     });
 
@@ -255,8 +251,6 @@ class Popup extends Observer{
                                               lots_available, no_of_interested_drivers, type_of_parking_system,
                                                vacancy_percentage));
     });
-
-    console.log(this.carpark);
   }
 
   destroy() {
@@ -343,6 +337,6 @@ export class PopupSingletonFactory {
 
     if (this.popup) this.popup.destroy();
 
-    this.popup = new Popup(App, App.carparkData.findCarparkByNo(car_park_no));
+    this.popup = new Popup(App, App.carparkData.findCarparkFromNo(car_park_no));
   }
 }

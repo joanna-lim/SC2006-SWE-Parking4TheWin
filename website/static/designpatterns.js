@@ -11,17 +11,11 @@ export class Subject {
     }
 
     removeObserver(observer) {
-        this.callbacks = this.callbacks.filter(c => c.observer.observerID !== observer.observerID);
+        this.callbacks = this.callbacks.filter(c => c.observer !== observer);
     }
 
     notifyObservers(data, callbackType) {
         this.callbacks.filter(observer => observer.callbackType === callbackType)
                       .forEach(observer => observer.callback(data));
-    }
-}
-
-export class Observer {
-    constructor() {
-        this.observerID = Math.floor(Math.random() * 900000) + 100000;
     }
 }

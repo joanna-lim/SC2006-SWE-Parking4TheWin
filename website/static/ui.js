@@ -3,6 +3,14 @@ class UIComponent {
         this.id = id;
         this.component = $(`#${id}`);
     }
+
+    show() {
+        this.component.show();
+    }
+
+    hide() {
+        this.component.hide();
+    }
 }
 
 class GenericButton extends UIComponent {
