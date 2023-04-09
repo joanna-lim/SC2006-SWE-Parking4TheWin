@@ -3,7 +3,6 @@
 
 {% block headcontent %}
 <script defer src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css" rel="stylesheet" />
 <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
 <style>
@@ -125,7 +124,7 @@
             </div>
           </div>
           <div class="row justify-content-center">
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" id="search-form-submit-button">
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                 style="display:none;"></span>
               <span class="disabled-label" style="display: none;">Searching...</span>
@@ -214,13 +213,6 @@
   var hasVehicle = {{ has_vehicle| lower }};
   var isColorBlindModeOn = false;
   const colorBlindModeBtn = document.getElementById("color-blind-mode-btn");
-
-  colorBlindModeBtn.addEventListener("click", function () {
-    isColorBlindModeOn = !isColorBlindModeOn;
-    map.removeLayer("carparks-layer");
-    map.removeSource("carparks-data");
-    loadGeoJSONData();
-  });
 </script>
-<script defer src="static/map.js"></script>
+<script defer type="module" src="static/home.js"></script>
 {% endblock %}
